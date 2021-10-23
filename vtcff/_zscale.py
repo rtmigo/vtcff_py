@@ -1,4 +1,3 @@
-import unittest
 from typing import Optional
 
 
@@ -40,7 +39,6 @@ class ZscaleCommand:
         else:
             return "limited"
 
-
     @property
     def dst_range_full(self) -> Optional[bool]:
         return self._full_limited_none(self._pairs.get('range'))
@@ -50,7 +48,6 @@ class ZscaleCommand:
         self._set_or_remove('range',
                             self._bool_to_full_limited_none(x))
 
-
     @property
     def src_range_full(self) -> Optional[bool]:
         return self._full_limited_none(self._pairs.get('rangein'))
@@ -59,8 +56,6 @@ class ZscaleCommand:
     def src_range_full(self, x: Optional[bool]):
         self._set_or_remove('rangein',
                             self._bool_to_full_limited_none(x))
-
-
 
     @property
     def dst_matrix(self) -> Optional[str]:
@@ -77,31 +72,7 @@ class ZscaleCommand:
             lhs + '=' + rhs for (lhs, rhs) in self._pairs.items())
 
 
-class TestZscaleCommand(unittest.TestCase):
-    def test_empty(self):
-        z = ZscaleCommand()
-        self.assertEqual(str(z), '')
-
-    def test_full_to_limited(self):
-        z = ZscaleCommand()
-        z.src_range_full = True
-        z.dst_range_full = False
-        self.assertEqual(str(z), 'zscale=rangein=full:range=limited')
-
-    def test_709_plus(self):
-        z = ZscaleCommand()
-        #z.range_full_to_limited()
-        z.dst_matrix = '709'
-        self.assertEqual(str(z), 'zscale=matrix=709')
-
-#    def test_709(self):
-        # z = ZscaleCommand()
-        # self.assertEqual(z.)
-        # z.range_full_to_limited()
-        # z.dst_matrix = '709'
-        # self.assertEqual(str(z), 'zscale=rangein=full:range=limited:matrix=709')
-
-class ZscaleColorSpaces:
+class ColorSpaces:
     _data = [
         ('bt709', '709'),
         (None, None)
