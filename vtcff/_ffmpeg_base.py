@@ -1,18 +1,13 @@
 # (c) 2021 Artёm IG <github.com/rtmigo>
 
-from typing import Optional, List, Iterable, Dict, NamedTuple
+from typing import Optional, List, Iterable, Dict
 
 from vtcff._args_subset import ArgsSubset
 from vtcff._time_span import BeginEndDuration
 from vtcff._zscale import ZscaleCommand, ColorSpaces
 from vtcff.filters._swscale_scale import SwscaleScaleFilter
 from vtcff.filters._transpose import Transpose, TransposeFilter
-
-
-class Scaling(NamedTuple):
-    width: int
-    height: int
-    downscale_only: bool
+from vtcff.filters.common import Scaling
 
 
 class VtcFfmpegCommand:
@@ -72,21 +67,31 @@ class VtcFfmpegCommand:
 
     @property
     def scaling(self) -> Optional[Scaling]:
-        if self._use_zscale:
-            raise Exception("Not implemented for zscale")
 
-        f: Optional[SwscaleScaleFilter] = self._find_filter(SwscaleScaleFilter)
-        if f is not None:
-            return Scaling(f.wh[0], f.wh[1], f.downscale_only)
-        return None
+        if self._use_zscale:
+            f: Optional[ZscaleCommand] = self._find_filter(ZscaleCommand)
+            if f is not None:
+                return f.scaling
+            return None
+
+        else:
+            f: Optional[SwscaleScaleFilter] = self._find_filter(
+                SwscaleScaleFilter)
+            if f is not None:
+                return Scaling(f.wh[0], f.wh[1], f.downscale_only)
+            return None
+
+
 
     @scaling.setter
     def scaling(self, s: Scaling):
         if self._use_zscale:
-            raise Exception("Not implemented for zscale")
-        f: SwscaleScaleFilter = self._find_or_create_filter(SwscaleScaleFilter)
-        f.wh = s.width, s.height
-        f.downscale_only = s.downscale_only
+            f: ZscaleCommand = self._find_or_create_filter(ZscaleCommand)
+            f.scaling = s
+        else:
+            f: SwscaleScaleFilter = self._find_or_create_filter(SwscaleScaleFilter)
+            f.wh = s.width, s.height
+            f.downscale_only = s.downscale_only
 
     @property
     def transpose(self) -> Optional[Transpose]:

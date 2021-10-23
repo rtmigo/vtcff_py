@@ -1,7 +1,8 @@
 import unittest
 
-from vtcff._ffmpeg_base import VtcFfmpegCommand, Scaling
+from vtcff._ffmpeg_base import VtcFfmpegCommand
 from vtcff.filters._transpose import Transpose
+from vtcff.filters.common import Scaling
 
 
 class TestCommand(unittest.TestCase):
@@ -175,3 +176,14 @@ class TestCommand(unittest.TestCase):
         self.assertIn(
             '-sws_flags spline+accurate_rnd+full_chroma_int+full_chroma_inp',
             str(cmd))
+
+    def test_zscale_scale(self):
+        with self.subTest("Constant"):
+            cmd = self.create_default(zscale=True)
+            expected = '-vf zscale=filter=spline36:w=1920:h=1080'
+            self.assertNotIn(expected, str(cmd))
+            scaling = Scaling(1920, 1080, False)
+            cmd.scaling = scaling
+            self.assertEqual(cmd.scaling, scaling)
+            self.assertIn(expected, str(cmd))
+            self.assert_sws_flags(cmd)

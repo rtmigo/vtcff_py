@@ -2,11 +2,14 @@
 
 from typing import Optional
 
+from vtcff.filters.common import Scaling
+
 
 class ZscaleCommand:
 
     def __init__(self):
         self._pairs = dict()
+        self.scaling: Optional[Scaling] = None
 
     def _set_or_remove(self, key: str, val: Optional[str]):
         if val is not None:
@@ -67,11 +70,25 @@ class ZscaleCommand:
     def dst_matrix(self, val: Optional[str]):
         self._set_or_remove('matrix', val)
 
+    # w = -2:h = 2160
+
     def __str__(self):
-        if not self._pairs:
+
+        all_pairs = dict()
+        if self.scaling is not None:
+            if self.scaling.downscale_only:
+                raise NotImplementedError
+            all_pairs["filter"] = 'spline36'
+            all_pairs["w"] = str(self.scaling.width)
+            all_pairs["h"] = str(self.scaling.height)
+
+        for k, v in self._pairs.items():
+            all_pairs[k] = v
+
+        if not all_pairs:
             return ''
         return "zscale=" + ":".join(
-            lhs + '=' + rhs for (lhs, rhs) in self._pairs.items())
+            lhs + '=' + rhs for (lhs, rhs) in all_pairs.items())
 
 
 class ColorSpaces:
