@@ -69,3 +69,17 @@ class TestCommand(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             cmd.dst_color_space = 'labuda'
+
+    def test_override_colorspace(self):
+        cmd = self.create_default()
+        cmd.dst_color_space = 'bt709'
+        self.assertIn('-colorspace bt709', str(cmd))
+
+        cmd.override_video.list.extend(['-colorspace', 'bt2020'])
+        self.assertNotIn('-colorspace bt709', str(cmd))
+        self.assertIn('-colorspace bt2020', str(cmd))
+
+        cmd.override_video.string = '-colorspace bt601'
+        self.assertNotIn('-colorspace bt709', str(cmd))
+        self.assertNotIn('-colorspace bt2020', str(cmd))
+        self.assertIn('-colorspace bt601', str(cmd))
