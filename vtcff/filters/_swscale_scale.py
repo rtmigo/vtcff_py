@@ -8,7 +8,7 @@ class SwscaleScaleFilter:
         if self.downscale_only:
             w, h = self.wh
             return pfx + ':'.join(
-                [f'min(iw,{w})' if w > 0 else str(w),
-                 f'min(ih,{h})' if h > 0 else str(h)])
+                [f"'min(iw,{w})'" if w > 0 else str(w),
+                 f"'min(ih,{h})'" if h > 0 else str(h)])
         else:
             return f'{pfx}{self.wh[0]}:{self.wh[1]}'  # -1:'min(ih,720)

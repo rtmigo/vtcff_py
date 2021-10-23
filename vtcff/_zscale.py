@@ -87,6 +87,9 @@ class ZscaleCommand:
 
         if not all_pairs:
             return ''
+
+        all_pairs['dither'] = 'error_diffusion'
+
         return "zscale=" + ":".join(
             lhs + '=' + rhs for (lhs, rhs) in all_pairs.items())
 

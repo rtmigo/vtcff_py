@@ -144,7 +144,7 @@ class TestCommand(unittest.TestCase):
 
         with self.subTest("Downscale both"):
             cmd = self.create_default()
-            expected = '-vf scale=min(iw,1920):min(ih,1080)'
+            expected = "-vf scale='min(iw,1920)':'min(ih,1080)'"
             self.assertNotIn(expected, str(cmd))
             scaling = Scaling(1920, 1080, True)
             cmd.scaling = scaling
@@ -154,7 +154,7 @@ class TestCommand(unittest.TestCase):
 
         with self.subTest("Downscale height"):
             cmd = self.create_default()
-            expected = '-vf scale=-2:min(ih,1080)'
+            expected = "-vf scale=-2:'min(ih,1080)'"
             self.assertNotIn(expected, str(cmd))
             scaling = Scaling(-2, 1080, True)
             cmd.scaling = scaling
@@ -164,7 +164,7 @@ class TestCommand(unittest.TestCase):
 
         with self.subTest("Downscale width"):
             cmd = self.create_default()
-            expected = '-vf scale=min(iw,1920):-1'
+            expected = "-vf scale='min(iw,1920)':-1"
             self.assertNotIn(expected, str(cmd))
             scaling = Scaling(1920, -1, True)
             cmd.scaling = scaling
