@@ -5,13 +5,42 @@ from vtcff.filters._transpose import Transpose
 from vtcff.filters.common import Scaling
 
 
+def rindex(alist, value):
+    return len(alist) - alist[-1::-1].index(value) - 1
+
+
 class TestCommand(unittest.TestCase):
 
     def create_default(self, zscale=False) -> VtcFfmpegCommand:
         cmd = VtcFfmpegCommand(use_zscale=zscale)
-        # cmd.inputFile = "/path/to/src.mov"
-        # cmd.outputfile = "/path/to/dst.mp4"
+        cmd.src_file = "/tmp/path/to/src.mov"
+        cmd.dst_file = "/tmp/path/to/dst.mov"
         return cmd
+
+    def test_ffmpeg_is_first_arg(self):
+        cmd = self.create_default()
+        self.assertEqual(list(cmd)[0], 'ffmpeg')
+
+    def test_src_file_is_in_args(self):
+        cmd = self.create_default()
+        self.assertIn(cmd.src_file, list(cmd))
+
+    def test_dst_file_is_last_arg(self):
+        cmd = self.create_default()
+        self.assertEqual(cmd.dst_file, list(cmd)[-1])
+
+    def test_framerate_before_i(self):
+        cmd = self.create_default()
+        cmd.src_fps = 30
+        args = list(cmd)
+        self.assertLess(args.index('-framerate'), args.index('-i'))
+        self.assertLess(args.index('-r'), args.index('-i'))
+
+    def test_gamma_before_i(self):
+        cmd = self.create_default()
+        cmd.src_gamma = 2.2
+        args = list(cmd)
+        self.assertLess(args.index('-gamma'), args.index('-i'))
 
     def test_dst_range_limited(self):
         cmd = self.create_default(zscale=True)
@@ -94,33 +123,44 @@ class TestCommand(unittest.TestCase):
         self.assertIn('-eniki beniki', str(cmd))
 
     def test_time_range_in(self):
-        # todo убедиться, что это после -i
         cmd = self.create_default()
         expected = '-ss 2'
         self.assertNotIn(expected, str(cmd))
-        cmd.write_time_range.begin = 2
+        cmd.dst_time_range.begin = 2
         self.assertIn(expected, str(cmd))
 
+        # убедимся, что оно после -i
+        args = list(cmd)
+        self.assertGreater(args.index('-ss'), rindex(args, '-i'))
+
     def test_time_range_duration(self):
-        # todo убедиться, что это после -i
         cmd = self.create_default()
         expected = '-t 10'
         self.assertNotIn(expected, str(cmd))
-        cmd.write_time_range.duration = 10
+        cmd.dst_time_range.duration = 10
         self.assertIn(expected, str(cmd))
 
+        # убедимся, что оно после -i
+        args = list(cmd)
+        self.assertGreater(args.index('-t'), rindex(args, '-i'))
+
     def test_time_range_in_none_zero(self):
-        # todo убедиться, что это после -i
         cmd = self.create_default()
+
         with self.subTest("none"):
-            cmd.write_time_range.begin = None
+            cmd.dst_time_range.begin = None
             self.assertNotIn('-ss', str(cmd))
         with self.subTest("zero"):
-            cmd.write_time_range.begin = 0
+            cmd.dst_time_range.begin = 0
             self.assertNotIn('-ss', str(cmd))
+
         with self.subTest("1"):
-            cmd.write_time_range.begin = 1
+            cmd.dst_time_range.begin = 1
             self.assertIn('-ss', str(cmd))
+
+            # убедимся, что оно после -i
+            args = list(cmd)
+            self.assertGreater(args.index('-ss'), rindex(args, '-i'))
 
     def test_transpose(self):
         cmd = self.create_default()

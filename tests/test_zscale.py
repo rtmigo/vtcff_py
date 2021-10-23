@@ -1,6 +1,6 @@
 import unittest
 
-from vtcff._zscale import ZscaleCommand
+from vtcff.filters._zscale import ZscaleCommand
 
 
 class TestZscaleCommand(unittest.TestCase):
