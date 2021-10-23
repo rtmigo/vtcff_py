@@ -70,7 +70,7 @@ class TestCommand(unittest.TestCase):
         with self.assertRaises(ValueError):
             cmd.dst_color_space = 'labuda'
 
-    def test_override_colorspace(self):
+    def test_override_known_param(self):
         cmd = self.create_default()
         cmd.dst_color_space = 'bt709'
         self.assertIn('-colorspace bt709', str(cmd))
@@ -83,3 +83,10 @@ class TestCommand(unittest.TestCase):
         self.assertNotIn('-colorspace bt709', str(cmd))
         self.assertNotIn('-colorspace bt2020', str(cmd))
         self.assertIn('-colorspace bt601', str(cmd))
+
+    def test_override_unset_param(self):
+        cmd = self.create_default()
+        self.assertNotIn('-eniki beniki', str(cmd))
+        cmd.override_general.string = '-eniki beniki'
+        self.assertIn('-eniki beniki', str(cmd))
+

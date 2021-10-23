@@ -5,7 +5,6 @@ from vtcff._zscale import ZscaleCommand, ColorSpaces
 
 
 class VtcFfmpegCommand:
-    # этот класс я создаю с 2021-10 и стараюсь здесь делать всё "чисто"
     def __init__(self):
         # следующие поля будут влиять на параметры, которые имеют довольно
         # туманное значение. Например, чтобы при кодировании видеть
@@ -27,8 +26,9 @@ class VtcFfmpegCommand:
 
         # этот объект сам умеет генерировать понятные (нам) опции.
         # Но если я хочу задать команду в виде строки или списка, можно
-        # поместить соответствующие параметры в следующие поля. Такие
-        # параметры будут считаться более приоритетными
+        # поместить соответствующие параметры в следующие поля. Эти параметры
+        # считаются более приоритетными и заменят сгенерированные (при
+        # условии, что имеют формат '-key value')
         self.override_general: ArgsSubset = ArgsSubset()
         self.override_audio: ArgsSubset = ArgsSubset()
         self.override_video: ArgsSubset = ArgsSubset()
@@ -107,14 +107,16 @@ class VtcFfmpegCommand:
         return overrides
 
     def __iter__(self) -> Iterable[str]:
+        """Возвращает аргументы к команде ffmpeg списком."""
         overrides = self._overrides_to_dict()
+
+        returned_keys = set()
 
         for item in self._iter_known():
             if isinstance(item, str):
                 yield item
             elif isinstance(item, tuple):
                 k, v = item
-                print(k, v)
                 if k in overrides:
                     other_v = overrides[k]
                     print(f"Overriding [{k} {v}] with [{k}, {other_v}]")
@@ -123,8 +125,20 @@ class VtcFfmpegCommand:
                 else:
                     yield k
                     yield v
+                returned_keys.add(k)
             else:
                 raise TypeError
+
+        # до сих пор мы генерировали последовательность известных объекту
+        # аргументов в привычном нам порядке. Некоторые аргументы могли быть
+        # подменены на значения из словаря overrides. Но возможно в словаре
+        # overrides есть и другие аргументы, до сих пор не упомянутые.
+        # Возвращаем теперь их
+        for k, v in overrides.items():
+            if k not in returned_keys:
+                yield k
+                if v is not None:
+                    yield v
 
     def __str__(self):
         return ' '.join(iter(self))
