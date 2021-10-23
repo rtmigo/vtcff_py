@@ -14,7 +14,7 @@ setup(
     author_email="ortemeo@gmail.com",
     url='https://github.com/rtmigo/vtcff_py',
 
-    packages=find_packages(include=['vtcff', 'vtcff.*']),
+    packages=find_packages(), #include=['vtcff', 'vtcff.*']),
 
     python_requires='>=3.9',
     install_requires=[],
