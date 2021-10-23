@@ -1,3 +1,5 @@
+# (c) 2021 Artёm IG <github.com/rtmigo>
+
 from typing import Optional, List, Iterable, Dict
 
 from vtcff._args_subset import ArgsSubset
@@ -81,7 +83,6 @@ class VtcFfmpegCommand:
 
         if self._dst_colorspace_meta is not None:
             yield '-colorspace', self._dst_colorspace_meta
-
         if self._dst_color_primaries_meta is not None:
             yield '-color_primaries', self._dst_color_primaries_meta
         if self._dst_color_trc_meta is not None:

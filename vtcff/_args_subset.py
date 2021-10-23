@@ -1,3 +1,5 @@
+# (c) 2021 Artёm IG <github.com/rtmigo>
+
 import shlex
 import unittest
 from typing import List, Iterable, Tuple, Optional

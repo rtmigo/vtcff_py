@@ -1,3 +1,5 @@
+# (c) 2021 Artёm IG <github.com/rtmigo>
+
 from typing import Optional
 
 
