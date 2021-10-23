@@ -5,6 +5,8 @@ from typing import List, Iterable, Tuple, Optional
 
 
 class ArgsSubset:
+    # хранит аргументы в виде List[str].
+    # Позволяет задавать/читать их и иначе: в виде строки, в виде списка пар
     def __init__(self):
         self.list: List[str] = list()
 
@@ -29,7 +31,6 @@ class ArgsSubset:
                     continue
                 else:
                     raise ValueError(arg)
-
             else:
                 assert prev_key is not None
                 if is_key(arg):
