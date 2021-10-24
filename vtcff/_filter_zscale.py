@@ -4,64 +4,59 @@
 from typing import Optional
 
 from vtcff._common import Scale
+from vtcff._filter_base import FilterBase
 
 
-class ZscaleCommand:
+def _bool_to_full_limited_none(x: Optional[bool]):
+    if x is None:
+        return None
+    elif x:
+        return "full"
+    else:
+        return "limited"
+
+def _full_limited_none(x: Optional[str]):
+    if x is None:
+        return None
+    elif x == "full":
+        return True
+    elif x == "limited":
+        return False
+    else:
+        raise ValueError
+
+
+class ZscaleCommand(FilterBase):
 
     def __init__(self):
-        self._pairs = dict()
+        super().__init__()
         self.scaling: Optional[Scale] = None
-
-    def _set_or_remove(self, key: str, val: Optional[str]):
-        if val is not None:
-            self._pairs[key] = val
-        else:
-            assert val is None
-            if key in self._pairs:
-                del self._pairs[key]
-        assert self._pairs.get(key) == val
 
     # def range_full_to_limited(self):
     #     self._pairs['rangein'] = "full"
     #     self._pairs['range'] = "limited"
 
-    @staticmethod
-    def _full_limited_none(x: Optional[str]):
-        if x is None:
-            return None
-        elif x == "full":
-            return True
-        elif x == "limited":
-            return False
-        else:
-            raise ValueError
 
-    @staticmethod
-    def _bool_to_full_limited_none(x: Optional[bool]):
-        if x is None:
-            return None
-        elif x:
-            return "full"
-        else:
-            return "limited"
+
+
 
     @property
     def dst_range_full(self) -> Optional[bool]:
-        return self._full_limited_none(self._pairs.get('range'))
+        return _full_limited_none(self._pairs.get('range'))
 
     @dst_range_full.setter
     def dst_range_full(self, x: Optional[bool]):
         self._set_or_remove('range',
-                            self._bool_to_full_limited_none(x))
+                            _bool_to_full_limited_none(x))
 
     @property
     def src_range_full(self) -> Optional[bool]:
-        return self._full_limited_none(self._pairs.get('rangein'))
+        return _full_limited_none(self._pairs.get('rangein'))
 
     @src_range_full.setter
     def src_range_full(self, x: Optional[bool]):
         self._set_or_remove('rangein',
-                            self._bool_to_full_limited_none(x))
+                            _bool_to_full_limited_none(x))
 
     @property
     def dst_matrix(self) -> Optional[str]:

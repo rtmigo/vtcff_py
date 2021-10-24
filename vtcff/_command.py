@@ -12,7 +12,7 @@ from vtcff._codec import Codec
 from vtcff._common import Scale
 from vtcff._filter_crop import Crop
 from vtcff._filter_pad import Pad
-from vtcff._filter_swscale_scale import SwscaleScaleFilter
+from vtcff._filter_swscale import SwscaleFilter
 from vtcff._filter_transpose import Transpose, TransposeFilter
 from vtcff._filter_zscale import ZscaleCommand, ColorSpaces
 from vtcff._time_span import BeginEndDuration
@@ -36,7 +36,7 @@ def arg_i(path_or_pattern: Union[str, Path]) -> List[str]:
 
 
 class FfmpegCommand:
-    def __init__(self, use_zscale: bool = False):
+    def __init__(self, use_zscale: bool = True):
 
         self._use_zscale = use_zscale
 
@@ -106,6 +106,19 @@ class FfmpegCommand:
             raise Exception("_use_zscale is False")
         return self._find_or_create_filter(ZscaleCommand)
 
+    def _swscale(self) -> SwscaleFilter:
+        """Returns `ZscaleCommand` from the filter chain.
+        If there is no such command, creates one."""
+        if self._use_zscale:
+            raise Exception("_use_zscale is True")
+        return self._find_or_create_filter(SwscaleFilter)
+
+    def _curr_scale_filter(self) -> Union[SwscaleFilter, ZscaleCommand]:
+        if self._use_zscale:
+            return self._zscale()
+        else:
+            return self._swscale()
+
     @property
     def scale(self) -> Optional[Scale]:
         if self._use_zscale:
@@ -115,10 +128,11 @@ class FfmpegCommand:
             return None
 
         else:
-            sw: Optional[SwscaleScaleFilter] = self._find_filter(
-                SwscaleScaleFilter)
-            if sw is not None:
-                return Scale(sw.wh[0], sw.wh[1], sw.downscale_only)
+            sw: Optional[SwscaleFilter] = self._find_filter(
+                SwscaleFilter)
+            if sw is not None and sw.width is not None:
+                assert sw.height is not None
+                return Scale(sw.width, sw.height, sw.downscale_only)
             return None
 
     @scale.setter
@@ -127,9 +141,9 @@ class FfmpegCommand:
             zs: ZscaleCommand = self._find_or_create_filter(ZscaleCommand)
             zs.scaling = s
         else:
-            sw: SwscaleScaleFilter = self._find_or_create_filter(
-                SwscaleScaleFilter)
-            sw.wh = s.width, s.height
+            sw: SwscaleFilter = self._find_or_create_filter(
+                SwscaleFilter)
+            sw.width, sw.height = s.width, s.height
             sw.downscale_only = s.downscale_only
 
     @property
@@ -166,40 +180,58 @@ class FfmpegCommand:
         self._replace_filter(Pad, x)
 
     @property
+    def src_color_space(self) -> Optional[str]:
+        if self._use_zscale:
+            # todo test
+            return ColorSpaces.zscale_to_ffmpeg(self._zscale().src_matrix)
+        else:
+            # todo test
+            return self._swscale().src_matrix
+
+    @src_color_space.setter
+    def src_color_space(self, val: Optional[str]):
+        if self._use_zscale:
+            self._zscale().src_matrix = ColorSpaces.ffmpeg_to_zscale(val)
+        else:
+            # todo test
+            self._swscale().src_matrix = val
+
+    @property
     def dst_color_space(self) -> Optional[str]:
-        return self._zscale().dst_matrix
+        if self._use_zscale:
+            # todo test
+            return ColorSpaces.zscale_to_ffmpeg(self._zscale().dst_matrix)
+        else:
+            # todo test
+            return self._swscale().dst_matrix
 
     @dst_color_space.setter
     def dst_color_space(self, val: Optional[str]):
-        self._zscale().dst_matrix = ColorSpaces.ffmpeg_to_zscale(val)
+        if self._use_zscale:
+            self._zscale().dst_matrix = ColorSpaces.ffmpeg_to_zscale(val)
+        else:
+            self._swscale().dst_matrix = val
+
         self._dst_color_primaries_meta = val
         self._dst_color_trc_meta = val
         self._dst_colorspace_meta = val
 
     @property
-    def src_color_space(self) -> Optional[str]:
-        return self._zscale().src_matrix
-
-    @src_color_space.setter
-    def src_color_space(self, val: Optional[str]):
-        self._zscale().src_matrix = ColorSpaces.ffmpeg_to_zscale(val)
-
-    @property
     def dst_range_full(self) -> Optional[bool]:
-        return self._zscale().dst_range_full
+        return self._curr_scale_filter().dst_range_full
 
     @dst_range_full.setter
     def dst_range_full(self, x: Optional[bool]):
-        self._zscale().dst_range_full = x
+        self._curr_scale_filter().dst_range_full = x
         self._dst_color_range_meta = x
 
     @property
     def src_range_full(self) -> Optional[bool]:
-        return self._zscale().src_range_full
+        return self._curr_scale_filter().src_range_full
 
     @src_range_full.setter
     def src_range_full(self, x: Optional[bool]):
-        self._zscale().src_range_full = x
+        self._curr_scale_filter().src_range_full = x
 
     def _iter_known(self):
         yield "ffmpeg"

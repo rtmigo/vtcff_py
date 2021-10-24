@@ -61,7 +61,27 @@ os.system(str(cmd))
 subprocess.run(list(cmd))
 ```
 
+# zscale and swscale
+
+These are two filters of a similar purpose.
+- [`scale`](https://ffmpeg.org/ffmpeg-filters.html#scale-1) ([libswscale](https://ffmpeg.org/libswscale.html)) is more versatile 
+- [`zscale`](https://ffmpeg.org/ffmpeg-filters.html#zscale-1) ([zimg](https://github.com/sekrit-twc/zimg)) gives a more predictable quality
+
+By default, `vtcff` uses `zscale` for color and size conversions.
+
+Sometimes it may lead to error "no path between colorspaces". This error would 
+not occur with swscale.
+
+To switch to the `swscale`, create object like this: 
+
+```python3
+from vtcff import FfmpegCommand
+
+a = FfmpegCommand(use_zscale=False)  # use swscale 
+```
+
 # Crop and scale
+
 
 ```python3
 from vtcff import FfmpegCommand, Scale, Crop
@@ -98,7 +118,7 @@ cmd.scale = Scale(-2, 1080)
 from vtcff import FfmpegCommand
 
 # use zscale (zimg) for color conversions
-cmd = FfmpegCommand(use_zscale=True)
+cmd = FfmpegCommand()
 
 # Full/Data/PC range to Limited/Video/TV
 cmd.src_range_full = True
@@ -144,7 +164,7 @@ import subprocess
 from vtcff import FfmpegCommand, Prores, ProresProfile
 
 # use zscale (zimg) for color conversions
-cmd = FfmpegCommand(use_zscale=True)
+cmd = FfmpegCommand()
 
 # input directory will be automatically transformed 
 # to a pattern like '/my/dir_with_frames/img_%04.png'   

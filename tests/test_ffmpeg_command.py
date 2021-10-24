@@ -7,10 +7,10 @@ from tempfile import TemporaryDirectory
 
 from tests.common import create_test_cmd
 from vtcff import Crop, FfmpegCommand, Hevc, Avc
+from vtcff._codec_avc_preset import VcPreset
 from vtcff._codec_prores_ks import Prores, ProresProfile
 from vtcff._common import Scale
 from vtcff._filter_transpose import Transpose
-from vtcff._codec_avc_preset import VcPreset
 
 
 def rindex(alist, value):
@@ -88,6 +88,7 @@ class TestHevc(BaseTest):
         cmd.dst_codec_video = Hevc(preset=VcPreset.N2_SUPERFAST)
         self.assertAllIn(items, str(cmd))
 
+
 class TestAvc(BaseTest):
     def test_base(self):
         cmd = create_test_cmd()
@@ -102,6 +103,7 @@ class TestAvc(BaseTest):
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Avc(preset=VcPreset.N5_FAST)
         self.assertAllIn(items, str(cmd))
+
 
 class TestCommand(BaseTest):
 
@@ -254,7 +256,7 @@ class TestCommand(BaseTest):
         # todo test swscale quality flags
         with self.subTest("Constant"):
             cmd = create_test_cmd()
-            expected = '-vf scale=1920:1080'
+            expected = '-vf scale=width=1920:height=1080'
             self.assertNotIn(expected, str(cmd))
             scaling = Scale(1920, 1080, False)
             cmd.scale = scaling
@@ -264,7 +266,7 @@ class TestCommand(BaseTest):
 
         with self.subTest("Downscale both"):
             cmd = create_test_cmd()
-            expected = "-vf scale='min(iw,1920)':'min(ih,1080)'"
+            expected = "-vf scale=width='min(iw,1920)':height='min(ih,1080)'"
             self.assertNotIn(expected, str(cmd))
             scaling = Scale(1920, 1080, True)
             cmd.scale = scaling
@@ -274,7 +276,7 @@ class TestCommand(BaseTest):
 
         with self.subTest("Downscale height"):
             cmd = create_test_cmd()
-            expected = "-vf scale=-2:'min(ih,1080)'"
+            expected = "-vf scale=width=-2:height='min(ih,1080)'"
             self.assertNotIn(expected, str(cmd))
             scaling = Scale(-2, 1080, True)
             cmd.scale = scaling
@@ -284,7 +286,7 @@ class TestCommand(BaseTest):
 
         with self.subTest("Downscale width"):
             cmd = create_test_cmd()
-            expected = "-vf scale='min(iw,1920)':-1"
+            expected = "-vf scale=width='min(iw,1920)':height=-1"
             self.assertNotIn(expected, str(cmd))
             scaling = Scale(1920, -1, True)
             cmd.scale = scaling
@@ -296,6 +298,12 @@ class TestCommand(BaseTest):
         self.assertIn(
             '-sws_flags spline+accurate_rnd+full_chroma_int+full_chroma_inp',
             str(cmd))
+
+    def test_zscale_is_default_scaler(self):
+        cmd = create_test_cmd(zscale=True)
+        self.assertTrue(cmd._use_zscale)
+        cmd.scale = Scale(2048, 1920)
+        self.assertIn("zscale=", str(cmd))
 
     def test_zscale_scale(self):
         with self.subTest("Constant"):
