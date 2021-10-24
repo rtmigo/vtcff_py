@@ -172,6 +172,15 @@ class FfmpegCommand:
         self._dst_colorspace_meta = val
 
     @property
+    def src_color_space(self) -> Optional[str]:
+        return self._zscale().src_matrix
+
+    @src_color_space.setter
+    def src_color_space(self, val: Optional[str]):
+        self._zscale().src_matrix = ColorSpaces.ffmpeg_to_zscale(val)
+
+
+    @property
     def dst_range_full(self) -> Optional[bool]:
         return self._zscale().dst_range_full
 
