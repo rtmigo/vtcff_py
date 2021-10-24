@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
+
 from typing import Optional
 
 from vtcff._filter_base import FilterBase
@@ -28,7 +29,8 @@ class SwscaleFilter(FilterBase):
     # "scale=" filter in the hope that swscale developers will eventually
     # figure out how best to carry out this conversion.
     #
-    # But at every opportunity, we prefer not to use this swscale at all.
+    # But at every opportunity, we prefer not to use this object and
+    # swscale at all (zscale seems to be much more predictable)
 
     def __init__(self):
         super().__init__()
