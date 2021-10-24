@@ -8,7 +8,7 @@ from typing import List
 
 
 @unique
-class Speed(Enum):
+class VcPreset(Enum):
     # https://trac.ffmpeg.org/wiki/Encode/H.264
     # https://trac.ffmpeg.org/wiki/Encode/H.265
 
@@ -24,8 +24,8 @@ class Speed(Enum):
     n10_placebo = "placebo"
 
     @classmethod
-    def faster(cls, speed: Speed) -> Speed:
-        arr: List[Speed] = list(cls)
+    def faster(cls, speed: VcPreset) -> VcPreset:
+        arr: List[VcPreset] = list(cls)
         idx = arr.index(speed)
         if idx < 0:
             raise ValueError

@@ -17,7 +17,7 @@ setup(
     packages=find_packages(), #include=['vtcff', 'vtcff.*']),
 
     python_requires='>=3.9',
-    install_requires=[],
+    install_requires=['framefile'],
 
     long_description=readme,
     long_description_content_type='text/markdown',
