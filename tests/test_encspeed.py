@@ -9,12 +9,12 @@ from vtcff._codec_avc_preset import VcPreset
 class TestEncSpeed(unittest.TestCase):
     def test_faster(self):
         self.assertEqual(
-            VcPreset.faster(VcPreset.n10_placebo),
-            VcPreset.n9_veryslow)
+            VcPreset.faster(VcPreset.N10_PLACEBO),
+            VcPreset.N9_VERYSLOW)
         self.assertEqual(
-            VcPreset.faster(VcPreset.n2_superfast),
-            VcPreset.n1_ultrafast)
+            VcPreset.faster(VcPreset.N2_SUPERFAST),
+            VcPreset.N1_ULTRAFAST)
         with self.assertRaises(IndexError):
-            VcPreset.faster(VcPreset.n1_ultrafast)
+            VcPreset.faster(VcPreset.N1_ULTRAFAST)
         with self.assertRaises(ValueError):
             VcPreset.faster("lbauda")

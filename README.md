@@ -30,7 +30,7 @@ cmd.dst_file = '/path/to/target.mov'
 
 # set set some filters
 cmd.scale = Scale(1920, 1080)
-cmd.transpose = Transpose.Clockwise
+cmd.transpose = Transpose.CLOCKWISE
 
 # set compression format
 cmd.dst_codec_video = Hevc(preset=VcPreset.n2_superfast)
@@ -152,7 +152,7 @@ cmd.src_file = '/my/dir_with_frames'
 cmd.src_fps = 29.97
 
 cmd.dst_file = '/videos/timelapse.mov'
-cmd.dst_codec_video = Prores(profile=ProresProfile.hq)
+cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
 
 # images usually have Full/Data/PC color range,
 # but most NLEs assume that videos have Limited/Video/TV range

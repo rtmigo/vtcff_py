@@ -2,13 +2,14 @@
 # SPDX-License-Identifier: MIT
 
 import os.path
-from codecs import Codec
+
 from pathlib import Path
 from typing import Optional, List, Iterable, Dict, Union
 
 import framefile
 
 from vtcff._args_subset import ArgsSubset
+from vtcff._codec import Codec
 from vtcff._common import Scale
 from vtcff._filter_crop import Crop
 from vtcff._filter_pad import Pad
@@ -31,6 +32,7 @@ def arg_i(path_or_pattern: Union[str, Path]) -> List[str]:
             path_or_pattern = framefile.directory_to_pattern(
                 framefile.Format.percent,
                 Path(path_or_pattern))
+        assert isinstance(path_or_pattern, str)
         return ["-i", path_or_pattern]
 
 
@@ -256,7 +258,7 @@ class FfmpegCommand:
                 yield '-vf', vf_str
 
         if self.dst_codec_video is not None:
-            for pair in self.dst_codec_video:
+            for pair in iter(self.dst_codec_video):
                 yield pair
 
         # странные параметры, которые определяют "метаданные" результирующего

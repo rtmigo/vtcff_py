@@ -55,7 +55,7 @@ class TestProres(BaseTest):
         cmd = create_test_cmd()
         items = ['-vcodec prores_ks', '-profile:v 3']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Prores(profile=ProresProfile.hq)
+        cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
         self.assertAllIn(items, str(cmd))
 
     def test_prores_vendor(self):
@@ -85,7 +85,7 @@ class TestHevc(BaseTest):
         cmd = create_test_cmd()
         items = ['-vcodec libx265', '-preset superfast']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Hevc(preset=VcPreset.n2_superfast)
+        cmd.dst_codec_video = Hevc(preset=VcPreset.N2_SUPERFAST)
         self.assertAllIn(items, str(cmd))
 
 class TestAvc(BaseTest):
@@ -100,7 +100,7 @@ class TestAvc(BaseTest):
         cmd = create_test_cmd()
         items = ['-vcodec libx264', '-preset fast']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Avc(preset=VcPreset.n5_fast)
+        cmd.dst_codec_video = Avc(preset=VcPreset.N5_FAST)
         self.assertAllIn(items, str(cmd))
 
 class TestCommand(BaseTest):
@@ -246,8 +246,8 @@ class TestCommand(BaseTest):
         cmd = create_test_cmd()
         expected = '-vf transpose=2'
         self.assertNotIn(expected, str(cmd))
-        cmd.transpose = Transpose.CounterClockwise
-        self.assertEqual(cmd.transpose, Transpose.CounterClockwise)
+        cmd.transpose = Transpose.COUNTER_CLOCKWISE
+        self.assertEqual(cmd.transpose, Transpose.COUNTER_CLOCKWISE)
         self.assertIn(expected, str(cmd))
 
     def test_swscale_scale(self):

@@ -12,16 +12,16 @@ class VcPreset(Enum):
     # https://trac.ffmpeg.org/wiki/Encode/H.264
     # https://trac.ffmpeg.org/wiki/Encode/H.265
 
-    n1_ultrafast = "ultrafast"
-    n2_superfast = "superfast"
-    n3_veryfast = "veryfast"
-    n4_faster = "faster"
-    n5_fast = "fast"
-    n6_medium = "medium"
-    n7_slow = "slow"
-    n8_slower = "slower"
-    n9_veryslow = "veryslow"
-    n10_placebo = "placebo"
+    N1_ULTRAFAST = "ultrafast"
+    N2_SUPERFAST = "superfast"
+    N3_VERYFAST = "veryfast"
+    N4_FASTER = "faster"
+    N5_FAST = "fast"
+    N6_MEDIUM = "medium"
+    N7_SLOW = "slow"
+    N8_SLOWER = "slower"
+    N9_VERYSLOW = "veryslow"
+    N10_PLACEBO = "placebo"
 
     @classmethod
     def faster(cls, speed: VcPreset) -> VcPreset:

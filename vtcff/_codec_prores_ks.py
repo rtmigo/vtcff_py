@@ -9,28 +9,28 @@ from ._codec import Codec
 
 @unique
 class ProresProfile(IntEnum):
-    proxy = 0
+    PROXY = 0
     """ProRes 422 Proxy"""
 
-    lt = 1
+    LT = 1
     """ProRes 422 LT"""
 
-    normal = 2
+    NORMAL = 2
     """ProRes 422"""
 
-    hq = 3
+    HQ = 3
     """ProRes 422 HQ"""
 
-    four = 4
+    FOUR = 4
     """ProRes 4444"""
 
-    xq = 5
+    XQ = 5
     """ProRes 4444 XQ"""
 
 
 class Prores(Codec):
     def __init__(self,
-                 profile: ProresProfile = ProresProfile.normal,
+                 profile: ProresProfile = ProresProfile.NORMAL,
                  qscale: Optional[int] = None,
                  spoof_vendor: bool = False):
         self.profile: ProresProfile = profile
