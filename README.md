@@ -21,7 +21,7 @@ This command will install the package, but not
 
 ```python3
 import subprocess
-from vtcff import FfmpegCommand, Scale, Transpose, Hevc, VcPreset
+from vtcff import FfmpegCommand, Scale, Transpose, Hevc
 
 cmd = FfmpegCommand()
 
