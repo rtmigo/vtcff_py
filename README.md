@@ -1,6 +1,6 @@
 # [vtcff](https://github.com/rtmigo/vtcff_py)
 
-**This project is a draft and is not intended to be used by anyone.**
+**This project is a draft 🍏 and is not intended to be used by anyone.**
 
 The library is designed for transcoding between video formats with an emphasis
 on maintaining quality and color depth in studio pipelines.
