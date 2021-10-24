@@ -10,7 +10,7 @@ from vtcff import Crop, FfmpegCommand, Hevc, Avc
 from vtcff._codec_prores_ks import Prores, ProresProfile
 from vtcff._common import Scale
 from vtcff._filter_transpose import Transpose
-from vtcff._hevc_encspeed import VcPreset
+from vtcff._codec_avc_preset import VcPreset
 
 
 def rindex(alist, value):

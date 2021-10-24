@@ -1,7 +1,9 @@
 # SPDX-FileCopyrightText: (c) 2016-2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
 
-from vtcff import FfmpegCommand, Pad, Scale
+
+from ._command import FfmpegCommand, Scale
+from ._filter_pad import Pad
 
 
 class LetterboxSizes:

@@ -3,7 +3,7 @@
 
 import unittest
 
-from vtcff._hevc_encspeed import VcPreset
+from vtcff._codec_avc_preset import VcPreset
 
 
 class TestEncSpeed(unittest.TestCase):

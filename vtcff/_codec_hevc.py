@@ -4,7 +4,7 @@
 from codecs import Codec
 from typing import Optional, Iterable, Tuple
 
-from vtcff import VcPreset
+from ._codec_avc_preset import VcPreset
 
 
 class Hevc(Codec):
