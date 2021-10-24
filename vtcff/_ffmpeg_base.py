@@ -5,14 +5,14 @@ from pathlib import Path
 from typing import Optional, List, Iterable, Dict, Union
 
 from vtcff._args_subset import ArgsSubset
+from vtcff._common import Scale
 from vtcff._encspeed import Speed
-from vtcff._time_span import BeginEndDuration
 from vtcff._filter_crop import Crop
 from vtcff._filter_pad import Pad
 from vtcff._filter_swscale_scale import SwscaleScaleFilter
 from vtcff._filter_transpose import Transpose, TransposeFilter
 from vtcff._filter_zscale import ZscaleCommand, ColorSpaces
-from vtcff._common import Scale
+from vtcff._time_span import BeginEndDuration
 
 
 def arg_i(path_or_pattern: str) -> List[str]:

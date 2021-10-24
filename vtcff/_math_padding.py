@@ -5,7 +5,6 @@ from vtcff import FfmpegCommand, Pad
 
 
 class LetterboxSizes:
-    # этот класс из zflow. Он пока не используется
     def __init__(self,
                  src_width: int, src_height: int,
                  dst_width: int, dst_height: int):

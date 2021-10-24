@@ -2,4 +2,4 @@
 
 `ffmpeg` automation tool.
 
-This project is still a rough draft and is not intended to be used by anyone.
+This project is still a draft and is not intended to be used by anyone.

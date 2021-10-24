@@ -44,5 +44,3 @@ class ArgsSubset:
 
         if prev_key is not None:
             yield prev_key, None
-
-
