@@ -23,3 +23,4 @@ class TestCropAndScale(unittest.TestCase):
         self.assertIn(':w=-2:h=1080', vf)
         # убедимся, что кроп делаем сначала, а скейлинг потом
         self.assertLess(vf.index('crop='), vf.index('zscale='))
+
