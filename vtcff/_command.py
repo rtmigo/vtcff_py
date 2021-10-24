@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
+
 import os.path
 from codecs import Codec
 from pathlib import Path
@@ -9,7 +10,6 @@ import framefile
 
 from vtcff._args_subset import ArgsSubset
 from vtcff._common import Scale
-from vtcff._hevc_encspeed import VcPreset
 from vtcff._filter_crop import Crop
 from vtcff._filter_pad import Pad
 from vtcff._filter_swscale_scale import SwscaleScaleFilter
@@ -32,8 +32,6 @@ def arg_i(path_or_pattern: Union[str, Path]) -> List[str]:
                 framefile.Format.percent,
                 Path(path_or_pattern))
         return ["-i", path_or_pattern]
-
-
 
 
 class FfmpegCommand:
@@ -184,7 +182,6 @@ class FfmpegCommand:
     @src_color_space.setter
     def src_color_space(self, val: Optional[str]):
         self._zscale().src_matrix = ColorSpaces.ffmpeg_to_zscale(val)
-
 
     @property
     def dst_range_full(self) -> Optional[bool]:

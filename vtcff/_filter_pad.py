@@ -15,4 +15,3 @@ class Pad(NamedTuple):
     def __str__(self):
         return "pad=width=%s:height=%s:x=%s:y=%s:color=%s" \
                % (self.width, self.height, self.left, self.top, self.color)
-

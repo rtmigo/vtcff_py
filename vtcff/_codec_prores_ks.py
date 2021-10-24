@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 from enum import unique, IntEnum
 from typing import Optional, Tuple, Iterable
 

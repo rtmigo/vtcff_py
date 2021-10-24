@@ -29,7 +29,7 @@ cmd.src_file = '/path/to/source.mov'
 cmd.dst_file = '/path/to/target.mov'
 
 # set set some filters
-cmd.scale = Scale(-2, 1080)
+cmd.scale = Scale(1920, 1080)
 cmd.transpose = Transpose.Clockwise
 
 # set compression format
@@ -126,7 +126,7 @@ cmd.override_video.string += "-x265-params lossless=1"
 cmd.override_video.list = ["-vcodec", "libx265"]
 cmd.override_video.list.extend(["-x265-params", "lossless=1"])
 
-# video, audio, general - are three groups of manually set arguments
+# video, audio and general are three independent groups arguments
 cmd.override_video.string = "-vcodec libx265"
 cmd.override_audio.string = "-c:a aac -cutoff 18000 -b:a 128K"
 cmd.override_general.string = "-movflags write_colr"

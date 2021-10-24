@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 from tests.common import create_test_cmd
-from vtcff import Crop, FfmpegCommand, Hevc
+from vtcff import Crop, FfmpegCommand, Hevc, Avc
 from vtcff._codec_prores_ks import Prores, ProresProfile
 from vtcff._common import Scale
 from vtcff._filter_transpose import Transpose
@@ -88,6 +88,20 @@ class TestHevc(BaseTest):
         cmd.dst_codec_video = Hevc(preset=VcPreset.n2_superfast)
         self.assertAllIn(items, str(cmd))
 
+class TestAvc(BaseTest):
+    def test_base(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec libx264']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Avc()
+        self.assertAllIn(items, str(cmd))
+
+    def test_preset(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec libx264', '-preset fast']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Avc(preset=VcPreset.n5_fast)
+        self.assertAllIn(items, str(cmd))
 
 class TestCommand(BaseTest):
 
