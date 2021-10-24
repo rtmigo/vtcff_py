@@ -71,6 +71,16 @@ class ZscaleCommand:
     def dst_matrix(self, val: Optional[str]):
         self._set_or_remove('matrix', val)
 
+    @property
+    def src_matrix(self) -> Optional[str]:
+        # todo test
+        return self._pairs.get('matrixin')
+
+    @src_matrix.setter
+    def src_matrix(self, val: Optional[str]):
+        # todo test
+        self._set_or_remove('matrixin', val)
+
     # w = -2:h = 2160
 
     def __str__(self):
@@ -98,6 +108,8 @@ class ZscaleCommand:
 class ColorSpaces:
     _data = [
         ('bt709', '709'),
+        ('bt601', '601'),
+        ('bt2020', '2020'),
         (None, None)
     ]
 
