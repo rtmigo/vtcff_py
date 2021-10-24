@@ -114,7 +114,7 @@ from vtcff import FfmpegCommand
 cmd = FfmpegCommand(use_zscale=True)
 
 cmd.src_file = '/my/timelapse/img_%04.jpg'
-cmd.dst_file = '/videos/timelapse.mp4'
+cmd.dst_file = '/videos/timelapse.mov'
 
 cmd.src_fps = 29.97
 
