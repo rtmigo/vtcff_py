@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: (c) 2016-2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
 
-from vtcff import FfmpegCommand, Pad
+from vtcff import FfmpegCommand, Pad, Scale
 
 
 class LetterboxSizes:
@@ -81,4 +81,4 @@ def _letterbox(cmd: FfmpegCommand,
                                   pad_top=sizes.pad_top,
                                   pad_bottom=sizes.pad_bottom)
     cmd._pad = Pad(left=l, top=t, width=w, height=h)
-    cmd.scale = (-2, dst_height)
+    cmd.scale = Scale(-2, dst_height)

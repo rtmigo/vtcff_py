@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 from enum import Enum, unique
+from typing import List
 
 
 @unique
@@ -24,7 +25,7 @@ class Speed(Enum):
 
     @classmethod
     def faster(cls, speed: Speed) -> Speed:
-        arr = list(cls)
+        arr: List[Speed] = list(cls)
         idx = arr.index(speed)
         if idx < 0:
             raise ValueError
