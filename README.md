@@ -4,7 +4,7 @@
 
 This project is a draft and is not intended to be used by anyone.
 
-# Basic sample
+# Basic example
 
 ```python3
 import subprocess
@@ -22,6 +22,37 @@ cmd.transpose = Transpose.Clockwise
 
 # run command
 subprocess.check_call(list(cmd))
+```
+
+# Crop and scale
+
+```python3
+from vtcff import FfmpegCommand, Scale, Crop
+
+# crop 10 pixels, then scale
+a = FfmpegCommand()
+a.crop = Crop(left=10)
+a.scale = Scale(1920, 1080)
+
+# scale, then crop 10 pixels
+b = FfmpegCommand()
+b.scale = Scale(1920, 1080)
+b.crop = Crop(left=10)
+```
+
+# Scale proportionally
+
+```python3
+from vtcff import FfmpegCommand, Scale
+
+cmd = FfmpegCommand()
+
+# set height to 1080, automatically compute width 
+cmd.scale = Scale(-1, 1080)
+
+# set height to 1080, select the width as the closest factor 
+# of two to the proportional size 
+cmd.scale = Scale(-2, 1080)
 ```
 
 # Change color range
@@ -65,4 +96,31 @@ cmd.override_general.string = "-movflags write_colr"
 
 # so you can modify one of the groups without touching the others
 cmd.override_video.string = "-vcodec prores_ks -profile:v 3"
+```
+
+# sRGB timelapse to rec.709 ProRes
+
+```python3
+import subprocess
+from vtcff import FfmpegCommand
+
+# use zscale (zimg) for color conversions
+cmd = FfmpegCommand(use_zscale=True)
+
+cmd.src_file = '/my/timelapse/img_%04.jpg'
+cmd.dst_file = '/videos/timelapse.mp4'
+
+cmd.override_video.string = "-vcodec prores_ks -profile:v 3"
+
+# Full/Data/PC range to Limited/Video/TV
+cmd.src_range_full = True
+cmd.dst_range_full = False
+
+# we will treat sRGB like rec.709, 
+# although it's a little sad
+cmd.src_color_space = 'bt709'
+cmd.dst_color_space = 'bt709'
+
+# run command
+subprocess.check_call(list(cmd))
 ```
