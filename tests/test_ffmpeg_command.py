@@ -245,3 +245,4 @@ class TestCommand(unittest.TestCase):
         self.assertEqual(cmd.crop, c)
         self.assertIn(expected, str(cmd))
         self.assert_sws_flags(cmd)
+

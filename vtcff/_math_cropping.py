@@ -32,19 +32,19 @@ def crop_height(width, aspect: Tuple[int, int], div=1):
     # Поэтому мы подбираем не только высоту, но и ширину уменьшаем до тех пор,
     # пока на найдем пару WxH, соответствующую требованиям.
 
-    aspect = aspect[0] / aspect[1]
+    aspect_f = aspect[0] / aspect[1]
 
     for w in range(width, 0, -1):
 
         if w % div != 0:
             continue
 
-        h = int(round(w / aspect))
+        h = int(round(w / aspect_f))
 
         if h % div != 0:
             continue
 
-        if round(h * aspect) == w:
+        if round(h * aspect_f) == w:
             return w, h
 
     return None, None
