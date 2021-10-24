@@ -148,12 +148,14 @@ class VtcFfmpegCommand:
         self._replace_filter(Crop, x)
 
     @property
-    def pad(self) -> Optional[Pad]:
+    def _pad(self) -> Optional[Pad]:
+        """Marked private because not tested."""
         # todo test
         return self._find_filter(Pad)
 
-    @pad.setter
-    def pad(self, x: Pad):
+    @_pad.setter
+    def _pad(self, x: Pad):
+        """Marked private because not tested."""
         # todo test
         self._replace_filter(Pad, x)
 

@@ -10,7 +10,7 @@ class Pad(NamedTuple):
     color: str = 'black'
 
     def __str__(self):
-        return "pad=width=%s:height=%s:x=%s:y=%s:color=%s" \
+        return "_pad=width=%s:height=%s:x=%s:y=%s:color=%s" \
                % (self.width, self.height, self.left, self.top, self.color)
 
     # def cropRect(self, rectPosX, rectPosY, rectWidth, rectHeight):

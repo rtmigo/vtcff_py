@@ -67,9 +67,10 @@ def pad_lrtb_to_lrwh(pad_left=0, pad_right=0, pad_top=0, pad_bottom=0):
     return x, y, width, height
 
 
-def letterbox(cmd: VtcFfmpegCommand,
-              src_width: int, src_height: int,
-              dst_width: int, dst_height: int):
+def _letterbox(cmd: VtcFfmpegCommand,
+               src_width: int, src_height: int,
+               dst_width: int, dst_height: int):
+    """Marked private because not tested."""
     # todo test
     sizes = LetterboxSizes(src_width=src_width, src_height=src_height,
                            dst_width=dst_width, dst_height=dst_height)
@@ -77,5 +78,5 @@ def letterbox(cmd: VtcFfmpegCommand,
                                   pad_right=sizes.pad_right,
                                   pad_top=sizes.pad_top,
                                   pad_bottom=sizes.pad_bottom)
-    cmd.pad = Pad(left=l, top=t, width=w, height=h)
+    cmd._pad = Pad(left=l, top=t, width=w, height=h)
     cmd.scale = (-2, dst_height)
