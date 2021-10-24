@@ -1,12 +1,16 @@
 # SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
 
+import os.path
+
 from pathlib import Path
 from typing import Optional, List, Iterable, Dict, Union
 
+import framefile
+
 from vtcff._args_subset import ArgsSubset
+from vtcff._codec import Codec
 from vtcff._common import Scale
-from vtcff._encspeed import Speed
 from vtcff._filter_crop import Crop
 from vtcff._filter_pad import Pad
 from vtcff._filter_swscale_scale import SwscaleScaleFilter
@@ -15,18 +19,20 @@ from vtcff._filter_zscale import ZscaleCommand, ColorSpaces
 from vtcff._time_span import BeginEndDuration
 
 
-def arg_i(path_or_pattern: str) -> List[str]:
+def arg_i(path_or_pattern: Union[str, Path]) -> List[str]:
+    path_or_pattern = str(path_or_pattern)
     if '*' in path_or_pattern:
         # http://ffmpeg.org/ffmpeg.html#Video-and-Audio-file-format-conversion
         return ["-f",
                 "image2",
                 "-pattern_type", "glob",
-                # чтобы передать аргумент со звездочкой внутрь ffmpeg
-                # (а не раскрыть эту звездочку на уровне среды),
-                # берем аргумент в кавычки. Но если я стану запускать ffmpeg
-                # при помощи Popen, кавычки нужно будет убрать
                 "-i", path_or_pattern]
     else:
+        if os.path.isdir(path_or_pattern):
+            path_or_pattern = framefile.directory_to_pattern(
+                framefile.Format.percent,
+                Path(path_or_pattern))
+        assert isinstance(path_or_pattern, str)
         return ["-i", path_or_pattern]
 
 
@@ -41,8 +47,6 @@ class FfmpegCommand:
 
         self.dst_file: Optional[Union[Path, str]] = None
 
-        self.speed: Optional[Speed] = None
-
         # следующие поля будут влиять на параметры, которые имеют довольно
         # туманное значение. Например, при кодировании они позволят увидеть
         #   yuv422p10le(tv, bt709, progressive)
@@ -54,6 +58,8 @@ class FfmpegCommand:
         self._dst_color_primaries_meta: Optional[str] = None
         self._dst_color_trc_meta: Optional[str] = None
         self._dst_colorspace_meta: Optional[str] = None
+
+        self.dst_codec_video: Optional[Codec] = None
 
         # про -color_range
         # https://trac.ffmpeg.org/ticket/443
@@ -179,7 +185,6 @@ class FfmpegCommand:
     def src_color_space(self, val: Optional[str]):
         self._zscale().src_matrix = ColorSpaces.ffmpeg_to_zscale(val)
 
-
     @property
     def dst_range_full(self) -> Optional[bool]:
         return self._zscale().dst_range_full
@@ -252,8 +257,9 @@ class FfmpegCommand:
             if vf_str:
                 yield '-vf', vf_str
 
-        if self.speed is not None:
-            yield '-preset', self.speed.value
+        if self.dst_codec_video is not None:
+            for pair in iter(self.dst_codec_video):
+                yield pair
 
         # странные параметры, которые определяют "метаданные" результирующего
         # видео. В итоге оно при кодировании выглядит например как

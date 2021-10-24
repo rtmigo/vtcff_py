@@ -2,19 +2,108 @@
 # SPDX-License-Identifier: MIT
 
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from tests.common import create_test_cmd
-from vtcff import Crop
+from vtcff import Crop, FfmpegCommand, Hevc, Avc
+from vtcff._codec_prores_ks import Prores, ProresProfile
 from vtcff._common import Scale
-from vtcff._encspeed import Speed
 from vtcff._filter_transpose import Transpose
+from vtcff._codec_avc_preset import VcPreset
 
 
 def rindex(alist, value):
     return len(alist) - alist[-1::-1].index(value) - 1
 
 
-class TestCommand(unittest.TestCase):
+class BaseTest(unittest.TestCase):
+    def assertAllIn(self, items, where):
+        for x in items:
+            self.assertIn(x, where)
+
+    def assertNoneIn(self, items, where):
+        for x in items:
+            self.assertNotIn(x, where)
+
+
+class TestInputArg(BaseTest):
+    def test_input_directory_as_frames(self):
+        with TemporaryDirectory() as tds:
+            td = Path(tds)
+            (td / "frame0001.png").touch()
+            (td / "frame0002.png").touch()
+            (td / "frame0003.png").touch()
+
+            cmd = FfmpegCommand()
+            cmd.src_file = td
+            cmd.dst_file = "/tmp/file.mov"
+
+            self.assertTrue(any(arg.endswith('frame%04d.png') for arg in cmd),
+                            list(cmd))
+
+
+class TestProres(BaseTest):
+    def test_prores(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec prores_ks', '-profile:v 2']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Prores()
+        self.assertAllIn(items, str(cmd))
+
+    def test_prores_hq(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec prores_ks', '-profile:v 3']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
+        self.assertAllIn(items, str(cmd))
+
+    def test_prores_vendor(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec prores_ks', '-vendor apl0']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Prores(spoof_vendor=True)
+        self.assertAllIn(items, str(cmd))
+
+    def test_prores_qscale(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec prores_ks', '-q:v 5']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Prores(qscale=5)
+        self.assertAllIn(items, str(cmd))
+
+
+class TestHevc(BaseTest):
+    def test_base(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec libx265']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Hevc()
+        self.assertAllIn(items, str(cmd))
+
+    def test_preset(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec libx265', '-preset superfast']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Hevc(preset=VcPreset.N2_SUPERFAST)
+        self.assertAllIn(items, str(cmd))
+
+class TestAvc(BaseTest):
+    def test_base(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec libx264']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Avc()
+        self.assertAllIn(items, str(cmd))
+
+    def test_preset(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec libx264', '-preset fast']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Avc(preset=VcPreset.N5_FAST)
+        self.assertAllIn(items, str(cmd))
+
+class TestCommand(BaseTest):
 
     def test_ffmpeg_is_first_arg(self):
         cmd = create_test_cmd()
@@ -45,25 +134,25 @@ class TestCommand(unittest.TestCase):
         cmd = create_test_cmd(zscale=True)
         expected = ['range=limited',
                     '-color_range 1']
-        self.assert_none_in(expected, str(cmd))
+        self.assertNoneIn(expected, str(cmd))
 
         cmd.dst_range_full = False
-        self.assert_all_in(expected, str(cmd))
+        self.assertAllIn(expected, str(cmd))
 
         cmd.dst_range_full = None
-        self.assert_none_in(expected, str(cmd))
+        self.assertNoneIn(expected, str(cmd))
 
     def test_dst_range_full(self):
         cmd = create_test_cmd(zscale=True)
         expected = ['range=full',
                     '-color_range 2']
-        self.assert_none_in(expected, str(cmd))
+        self.assertNoneIn(expected, str(cmd))
 
         cmd.dst_range_full = True
-        self.assert_all_in(expected, str(cmd))
+        self.assertAllIn(expected, str(cmd))
 
         cmd.dst_range_full = None
-        self.assert_none_in(expected, str(cmd))
+        self.assertNoneIn(expected, str(cmd))
 
     def test_range_full_to_limited(self):
         cmd = create_test_cmd(zscale=True)
@@ -72,14 +161,6 @@ class TestCommand(unittest.TestCase):
         cmd.src_range_full = True
         cmd.dst_range_full = False
         self.assertIn(addend, str(cmd))
-
-    def assert_all_in(self, items, where):
-        for x in items:
-            self.assertIn(x, where)
-
-    def assert_none_in(self, items, where):
-        for x in items:
-            self.assertNotIn(x, where)
 
     def test_color_spaces(self):
         cmd = create_test_cmd(zscale=True)
@@ -90,13 +171,13 @@ class TestCommand(unittest.TestCase):
                     '-vf',
                     'matrix=709']
 
-        self.assert_none_in(expected, str(cmd))
+        self.assertNoneIn(expected, str(cmd))
 
         cmd.dst_color_space = 'bt709'
-        self.assert_all_in(expected, str(cmd))
+        self.assertAllIn(expected, str(cmd))
 
         cmd.dst_color_space = None
-        self.assert_none_in(expected, str(cmd))
+        self.assertNoneIn(expected, str(cmd))
 
         with self.assertRaises(ValueError):
             cmd.dst_color_space = 'labuda'
@@ -165,8 +246,8 @@ class TestCommand(unittest.TestCase):
         cmd = create_test_cmd()
         expected = '-vf transpose=2'
         self.assertNotIn(expected, str(cmd))
-        cmd.transpose = Transpose.CounterClockwise
-        self.assertEqual(cmd.transpose, Transpose.CounterClockwise)
+        cmd.transpose = Transpose.COUNTER_CLOCKWISE
+        self.assertEqual(cmd.transpose, Transpose.COUNTER_CLOCKWISE)
         self.assertIn(expected, str(cmd))
 
     def test_swscale_scale(self):
@@ -227,15 +308,6 @@ class TestCommand(unittest.TestCase):
             self.assertIn(expected, str(cmd))
             self.assert_sws_flags(cmd)
 
-    def test_speed_preset(self):
-        cmd = create_test_cmd(zscale=True)
-        expected = '-preset fast'
-        self.assertNotIn(expected, str(cmd))
-        cmd.speed = Speed.n5_fast
-        self.assertEqual(cmd.speed, Speed.n5_fast)
-        self.assertIn(expected, str(cmd))
-        self.assert_sws_flags(cmd)
-
     def test_crop(self):
         cmd = create_test_cmd(zscale=True)
         expected = '-vf crop=100:200:10:20'
@@ -245,4 +317,3 @@ class TestCommand(unittest.TestCase):
         self.assertEqual(cmd.crop, c)
         self.assertIn(expected, str(cmd))
         self.assert_sws_flags(cmd)
-

@@ -3,18 +3,18 @@
 
 import unittest
 
-from vtcff._encspeed import Speed
+from vtcff._codec_avc_preset import VcPreset
 
 
 class TestEncSpeed(unittest.TestCase):
     def test_faster(self):
         self.assertEqual(
-            Speed.faster(Speed.n10_placebo),
-            Speed.n9_veryslow)
+            VcPreset.faster(VcPreset.N10_PLACEBO),
+            VcPreset.N9_VERYSLOW)
         self.assertEqual(
-            Speed.faster(Speed.n2_superfast),
-            Speed.n1_ultrafast)
+            VcPreset.faster(VcPreset.N2_SUPERFAST),
+            VcPreset.N1_ULTRAFAST)
         with self.assertRaises(IndexError):
-            Speed.faster(Speed.n1_ultrafast)
+            VcPreset.faster(VcPreset.N1_ULTRAFAST)
         with self.assertRaises(ValueError):
-            Speed.faster("lbauda")
+            VcPreset.faster("lbauda")
