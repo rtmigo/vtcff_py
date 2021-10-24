@@ -156,19 +156,20 @@ def whwh_to_xywh(sourceWidth, sourceHeight,
     # logger.info("finalHeight %d => finalWidth %.4f" % (
     #     targetHeight, targetHeight * tmpAspect))
 
-    # баг-2016? При размере кропнутой картинки 5471:2885 и scale=-1:2160 ffmpeg почему-то вычислял ширину
-    # целевого кадра как 4095, хотя арифметически ширина должна была получиться 2160*(5471/2885) = 4096.1386.
-    # Это выяснилось для отдельного видео, которое из размера 5472x3076 я хотел сконвертить в 4096x2160.
+    # баг-2016? При размере кропнутой картинки 5471:2885 и scale=-1:2160 ffmpeg
+    # почему-то вычислял ширину целевого кадра как 4095, хотя арифметически
+    # ширина должна была получиться 2160*(5471/2885) = 4096.1386. Это
+    # выяснилось для отдельного видео, которое из размера 5472x3076 я
+    # хотел сконвертить в 4096x2160.
     #
-    # Чтобы исправить проблему, я просто заменил scale=-1:2160 на scale=-2:2160. Как именно ffmpeg станет это
-    # округлять - неизвестно.
+    # Чтобы исправить проблему, я просто заменил scale=-1:2160 на
+    # scale=-2:2160. Как именно ffmpeg станет это округлять - не проверил
 
     assert round((sourceWidth - cropLeft - cropRight) / (
             sourceHeight - cropTop - cropBottom)) == round(
         targetWidth / targetHeight)
 
     return cropLeft, cropTop, croppedWidth, croppedHeight
-
 
 
 def crop_and_scale(cmd: VtcFfmpegCommand,
@@ -183,46 +184,5 @@ def crop_and_scale(cmd: VtcFfmpegCommand,
     cmd.crop = Crop(left=x, top=y, width=w, height=h)
     cmd.scale = Scale(-2, dst_height)
 
-    #     self.cropRect(rectPosX=cropLeft, rectPosY=cropTop,
-    #                   rectWidth=croppedWidth, rectHeight=croppedHeight)
-    #
-    #     self.videoFiltersList.append("scale=-2:%d" % targetHeight)
 
-class Letterbox:
-    # этот класс из zflow. Он пока не используется
-    def __init__(self,
-                 src_width: int, src_height: int,
-                 dst_width: int, dst_height: int):
 
-        src_aspect = src_width / src_height
-        dst_aspect = dst_width / dst_height
-
-        needSourceWidth = int(round(dst_aspect * src_height))
-        # если бы ширина исходника была равна этому значению,
-        # а высота неизменна, то в обоих файлах соотношение сторон было
-        # бы одинаковым
-
-        self.pad_left = 0
-        self.pad_right = 0
-        self.pad_top = 0
-        self.pad_bottom = 0
-
-        if needSourceWidth != src_width:
-            # придется добавлять полосы
-            if src_aspect > dst_aspect:
-                # исходник шире, чем результат
-                # нужно добавить к исходнику полосы сверху и снизу
-                needSourceHeight = src_width / dst_aspect
-                assert needSourceHeight > src_height
-                paddingTotal = needSourceHeight - src_height
-                paddingHalf = int(round(paddingTotal / 2))
-                self.pad_top = paddingHalf,
-                self.pad_bottom = paddingTotal - paddingHalf
-            else:
-                # исходник уже, чем результат
-                # нужно добавить к исходнику полосы слева и справа
-                assert needSourceWidth > src_width
-                paddingTotal = needSourceWidth - src_width
-                paddingHalf = int(round(paddingTotal / 2))
-                self.pad_left = paddingHalf,
-                self.pad_right = paddingTotal - paddingHalf

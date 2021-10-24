@@ -7,6 +7,7 @@ from vtcff._args_subset import ArgsSubset
 from vtcff._encspeed import Speed
 from vtcff._time_span import BeginEndDuration
 from vtcff.filters._cropping import Crop
+from vtcff.filters._padding import Pad
 from vtcff.filters._swscale_scale import SwscaleScaleFilter
 from vtcff.filters._transpose import Transpose, TransposeFilter
 from vtcff.filters._zscale import ZscaleCommand, ColorSpaces
@@ -145,6 +146,16 @@ class VtcFfmpegCommand:
     @crop.setter
     def crop(self, x: Crop):
         self._replace_filter(Crop, x)
+
+    @property
+    def pad(self) -> Optional[Pad]:
+        # todo test
+        return self._find_filter(Pad)
+
+    @pad.setter
+    def pad(self, x: Pad):
+        # todo test
+        self._replace_filter(Pad, x)
 
     @property
     def dst_color_space(self) -> Optional[str]:
