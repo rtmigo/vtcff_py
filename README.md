@@ -33,7 +33,7 @@ cmd.scale = Scale(1920, 1080)
 cmd.transpose = Transpose.CLOCKWISE
 
 # set compression format
-cmd.dst_codec_video = Hevc(preset=VcPreset.n2_superfast)
+cmd.dst_codec_video = Hevc()
 
 # run command
 subprocess.check_call(list(cmd))
