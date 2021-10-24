@@ -1,6 +1,9 @@
+# SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 import unittest
 
-from vtcff.filters._zscale import ZscaleCommand
+from vtcff._filter_zscale import ZscaleCommand
 
 
 class TestZscaleCommand(unittest.TestCase):

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: (c) 2016-2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 from vtcff import FfmpegCommand, Pad
 
 

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 class SwscaleScaleFilter:
     def __init__(self):
         self.wh = (-1, -1)

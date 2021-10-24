@@ -1,8 +1,10 @@
-# этот код из zflow. Он пока не используется
+# SPDX-FileCopyrightText: (c) 2016-2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 from typing import Tuple
 
 from ._ffmpeg_base import FfmpegCommand, Scale
-from .filters._cropping import Crop
+from vtcff._filter_crop import Crop
 
 
 def crop_height(width, aspect: Tuple[int, int], div=1):

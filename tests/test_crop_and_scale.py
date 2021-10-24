@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 import unittest
 
 from tests.common import find_item_after, create_test_cmd

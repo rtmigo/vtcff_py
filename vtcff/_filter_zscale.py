@@ -1,8 +1,9 @@
-# (c) 2021 Artёm IG <github.com/rtmigo>
+# SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
 
 from typing import Optional
 
-from vtcff.filters.common import Scale
+from vtcff._common import Scale
 
 
 class ZscaleCommand:

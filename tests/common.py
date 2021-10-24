@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 from typing import Iterable
 
 from vtcff import FfmpegCommand
@@ -11,7 +14,7 @@ def find_item_after(items: Iterable, findme):
             return next(it)
 
 
-def create_test_cmd(self, zscale=False) -> FfmpegCommand:
+def create_test_cmd(zscale=False) -> FfmpegCommand:
     cmd = FfmpegCommand(use_zscale=zscale)
     cmd.src_file = "/tmp/path/to/src.mov"
     cmd.dst_file = "/tmp/path/to/dst.mov"

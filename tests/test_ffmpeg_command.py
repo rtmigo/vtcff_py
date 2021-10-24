@@ -1,10 +1,13 @@
+# SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 import unittest
 
 from tests.common import create_test_cmd
 from vtcff import Crop
 from vtcff._encspeed import Speed
-from vtcff.filters._transpose import Transpose
-from vtcff.filters.common import Scale
+from vtcff._filter_transpose import Transpose
+from vtcff._common import Scale
 
 
 def rindex(alist, value):
