@@ -4,6 +4,12 @@
 
 This project is a draft and is not intended to be used by anyone.
 
+# Install
+
+```bash
+$ pip3 install git+https://github.com/rtmigo/vtcff_py#egg=vtcff
+```
+
 # Basic example
 
 ```python3
@@ -98,7 +104,7 @@ cmd.override_general.string = "-movflags write_colr"
 cmd.override_video.string = "-vcodec prores_ks -profile:v 3"
 ```
 
-# sRGB timelapse to rec.709 ProRes
+# JPEG timelapse to ProRes
 
 ```python3
 import subprocess
@@ -108,7 +114,9 @@ from vtcff import FfmpegCommand
 cmd = FfmpegCommand(use_zscale=True)
 
 cmd.src_file = '/my/timelapse/img_%04.jpg'
-cmd.dst_file = '/videos/timelapse.mp4'
+cmd.dst_file = '/videos/timelapse.mov'
+
+cmd.src_fps = 29.97
 
 cmd.override_video.string = "-vcodec prores_ks -profile:v 3"
 
@@ -116,7 +124,7 @@ cmd.override_video.string = "-vcodec prores_ks -profile:v 3"
 cmd.src_range_full = True
 cmd.dst_range_full = False
 
-# we will treat sRGB like rec.709, 
+# we will treat sRGB like Rec.709, 
 # although it's a little sad
 cmd.src_color_space = 'bt709'
 cmd.dst_color_space = 'bt709'
