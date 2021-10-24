@@ -4,6 +4,12 @@
 
 This project is a draft and is not intended to be used by anyone.
 
+# Install
+
+```bash
+pip3 install git+https://github.com/rtmigo/vtcff_py#egg=vtcff
+```
+
 # Basic example
 
 ```python3
