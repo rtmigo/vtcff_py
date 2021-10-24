@@ -104,7 +104,7 @@ cmd.override_general.string = "-movflags write_colr"
 cmd.override_video.string = "-vcodec prores_ks -profile:v 3"
 ```
 
-# sRGB timelapse to rec.709 ProRes
+# sRGB timelapse to Rec.709 ProRes
 
 ```python3
 import subprocess
@@ -115,6 +115,8 @@ cmd = FfmpegCommand(use_zscale=True)
 
 cmd.src_file = '/my/timelapse/img_%04.jpg'
 cmd.dst_file = '/videos/timelapse.mp4'
+
+cmd.src_fps = 29.97
 
 cmd.override_video.string = "-vcodec prores_ks -profile:v 3"
 
