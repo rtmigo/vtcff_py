@@ -15,6 +15,7 @@ def _bool_to_full_limited_none(x: Optional[bool]):
     else:
         return "limited"
 
+
 def _full_limited_none(x: Optional[str]):
     if x is None:
         return None
@@ -26,19 +27,10 @@ def _full_limited_none(x: Optional[str]):
         raise ValueError
 
 
-class ZscaleCommand(FilterBase):
-
+class ZscaleFilter(FilterBase):
     def __init__(self):
         super().__init__()
         self.scaling: Optional[Scale] = None
-
-    # def range_full_to_limited(self):
-    #     self._pairs['rangein'] = "full"
-    #     self._pairs['range'] = "limited"
-
-
-
-
 
     @property
     def dst_range_full(self) -> Optional[bool]:
