@@ -3,7 +3,7 @@
 
 from ._common import Scale
 from ._encspeed import Speed
-from ._ffmpeg_base import FfmpegCommand
+from ._command import FfmpegCommand
 from ._filter_crop import Crop
 from ._filter_pad import Pad
 from ._filter_transpose import Transpose
