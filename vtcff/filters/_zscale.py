@@ -2,14 +2,14 @@
 
 from typing import Optional
 
-from vtcff.filters.common import Scaling
+from vtcff.filters.common import Scale
 
 
 class ZscaleCommand:
 
     def __init__(self):
         self._pairs = dict()
-        self.scaling: Optional[Scaling] = None
+        self.scaling: Optional[Scale] = None
 
     def _set_or_remove(self, key: str, val: Optional[str]):
         if val is not None:

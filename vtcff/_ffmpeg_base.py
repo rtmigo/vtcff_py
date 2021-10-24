@@ -4,11 +4,13 @@ from pathlib import Path
 from typing import Optional, List, Iterable, Dict, Union
 
 from vtcff._args_subset import ArgsSubset
+from vtcff._encspeed import Speed
 from vtcff._time_span import BeginEndDuration
+from vtcff.filters._cropping import Crop
 from vtcff.filters._swscale_scale import SwscaleScaleFilter
 from vtcff.filters._transpose import Transpose, TransposeFilter
 from vtcff.filters._zscale import ZscaleCommand, ColorSpaces
-from vtcff.filters.common import Scaling
+from vtcff.filters.common import Scale
 
 
 def arg_i(path_or_pattern: str) -> List[str]:
@@ -36,6 +38,8 @@ class VtcFfmpegCommand:
         self.src_fps: Optional[float] = None
 
         self.dst_file: Optional[Union[Path, str]] = None
+
+        self.speed: Optional[Speed] = None
 
         # следующие поля будут влиять на параметры, которые имеют довольно
         # туманное значение. Например, чтобы при кодировании видеть
@@ -80,6 +84,14 @@ class VtcFfmpegCommand:
                 return vf
         return None
 
+    def _replace_filter(self, obj_type, new_instance):
+        for idx, item in enumerate(self._filter_chain):
+            if isinstance(item, obj_type):
+                self._filter_chain[idx] = new_instance
+                return
+
+        self._filter_chain.append(new_instance)
+
     def _zscale(self) -> ZscaleCommand:
         """Returns `ZscaleCommand` from the filter chain.
         If there is no such command, creates one."""
@@ -88,8 +100,7 @@ class VtcFfmpegCommand:
         return self._find_or_create_filter(ZscaleCommand)
 
     @property
-    def scaling(self) -> Optional[Scaling]:
-
+    def scale(self) -> Optional[Scale]:
         if self._use_zscale:
             zs: Optional[ZscaleCommand] = self._find_filter(ZscaleCommand)
             if zs is not None:
@@ -100,11 +111,11 @@ class VtcFfmpegCommand:
             sw: Optional[SwscaleScaleFilter] = self._find_filter(
                 SwscaleScaleFilter)
             if sw is not None:
-                return Scaling(sw.wh[0], sw.wh[1], sw.downscale_only)
+                return Scale(sw.wh[0], sw.wh[1], sw.downscale_only)
             return None
 
-    @scaling.setter
-    def scaling(self, s: Scaling):
+    @scale.setter
+    def scale(self, s: Scale):
         if self._use_zscale:
             zs: ZscaleCommand = self._find_or_create_filter(ZscaleCommand)
             zs.scaling = s
@@ -126,6 +137,14 @@ class VtcFfmpegCommand:
     def transpose(self, x: Transpose):
         f: TransposeFilter = self._find_or_create_filter(TransposeFilter)
         f.kind = x
+
+    @property
+    def crop(self) -> Optional[Crop]:
+        return self._find_filter(Crop)
+
+    @crop.setter
+    def crop(self, x: Crop):
+        self._replace_filter(Crop, x)
 
     @property
     def dst_color_space(self) -> Optional[str]:
@@ -209,6 +228,9 @@ class VtcFfmpegCommand:
             vf_str = ','.join(str(f) for f in self._filter_chain)
             if vf_str:
                 yield '-vf', vf_str
+
+        if self.speed is not None:
+            yield '-preset', self.speed.value
 
         # странные параметры, которые определяют "метаданные" результирующего
         # видео. В итоге оно при кодировании выглядит например как

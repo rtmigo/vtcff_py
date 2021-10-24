@@ -1,7 +1,7 @@
 from typing import NamedTuple
 
 
-class Scaling(NamedTuple):
+class Scale(NamedTuple):
     width: int
     height: int
-    downscale_only: bool
+    downscale_only: bool = False
