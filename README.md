@@ -61,7 +61,7 @@ os.system(str(cmd))
 subprocess.run(list(cmd))
 ```
 
-# zscale and swscale
+# zscale vs scale
 
 These are two filters of a similar purpose.
 - [`scale`](https://ffmpeg.org/ffmpeg-filters.html#scale-1) ([libswscale](https://ffmpeg.org/libswscale.html)) is more versatile 
