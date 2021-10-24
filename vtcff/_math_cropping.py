@@ -4,7 +4,7 @@
 from typing import Tuple
 
 from vtcff._filter_crop import Crop
-from ._ffmpeg_base import FfmpegCommand, Scale
+from ._command import FfmpegCommand, Scale
 
 
 def crop_height(width, aspect: Tuple[int, int], div=1):
