@@ -82,3 +82,4 @@ def _letterbox(cmd: FfmpegCommand,
                                   pad_bottom=sizes.pad_bottom)
     cmd._pad = Pad(left=l, top=t, width=w, height=h)
     cmd.scale = Scale(-2, dst_height)
+
