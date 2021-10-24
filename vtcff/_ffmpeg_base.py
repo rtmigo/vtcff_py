@@ -29,7 +29,7 @@ def arg_i(path_or_pattern: str) -> List[str]:
         return ["-i", path_or_pattern]
 
 
-class VtcFfmpegCommand:
+class FfmpegCommand:
     def __init__(self, use_zscale: bool = False):
 
         self._use_zscale = use_zscale

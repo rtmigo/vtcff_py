@@ -1,7 +1,8 @@
 # этот код из zflow. Он пока не используется
 from typing import Tuple
 
-from vtcff import VtcFfmpegCommand, Crop, Scale
+from ._ffmpeg_base import FfmpegCommand, Scale
+from .filters._cropping import Crop
 
 
 def crop_height(width, aspect: Tuple[int, int], div=1):
@@ -172,7 +173,7 @@ def whwh_to_xywh(sourceWidth, sourceHeight,
     return cropLeft, cropTop, croppedWidth, croppedHeight
 
 
-def crop_and_scale(cmd: VtcFfmpegCommand,
+def crop_and_scale(cmd: FfmpegCommand,
                    src_width, src_height,
                    dst_width, dst_height,
                    align_x="M", align_y="M"):

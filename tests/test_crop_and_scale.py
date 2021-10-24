@@ -1,7 +1,7 @@
 import unittest
 
 from tests.common import find_item_after, create_test_cmd
-from vtcff import VtcFfmpegCommand, crop_and_scale
+from vtcff import FfmpegCommand, crop_and_scale
 
 
 class TestCropAndScale(unittest.TestCase):

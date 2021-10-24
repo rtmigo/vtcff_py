@@ -1,4 +1,4 @@
-from vtcff import VtcFfmpegCommand, Pad
+from vtcff import FfmpegCommand, Pad
 
 
 class LetterboxSizes:
@@ -67,7 +67,7 @@ def pad_lrtb_to_lrwh(pad_left=0, pad_right=0, pad_top=0, pad_bottom=0):
     return x, y, width, height
 
 
-def _letterbox(cmd: VtcFfmpegCommand,
+def _letterbox(cmd: FfmpegCommand,
                src_width: int, src_height: int,
                dst_width: int, dst_height: int):
     """Marked private because not tested."""
