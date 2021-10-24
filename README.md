@@ -104,7 +104,7 @@ cmd.override_general.string = "-movflags write_colr"
 cmd.override_video.string = "-vcodec prores_ks -profile:v 3"
 ```
 
-# sRGB timelapse to Rec.709 ProRes
+# JPEG timelapse to ProRes
 
 ```python3
 import subprocess
@@ -124,7 +124,7 @@ cmd.override_video.string = "-vcodec prores_ks -profile:v 3"
 cmd.src_range_full = True
 cmd.dst_range_full = False
 
-# we will treat sRGB like rec.709, 
+# we will treat sRGB like Rec.709, 
 # although it's a little sad
 cmd.src_color_space = 'bt709'
 cmd.dst_color_space = 'bt709'
