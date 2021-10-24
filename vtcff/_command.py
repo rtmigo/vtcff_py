@@ -14,7 +14,7 @@ from vtcff._filter_crop import Crop
 from vtcff._filter_pad import Pad
 from vtcff._filter_swscale import SwscaleFilter
 from vtcff._filter_transpose import Transpose, TransposeFilter
-from vtcff._filter_zscale import ZscaleCommand, ColorSpaces
+from vtcff._filter_zscale import ZscaleFilter, ColorSpaces
 from vtcff._time_span import BeginEndDuration
 
 
@@ -99,12 +99,12 @@ class FfmpegCommand:
 
         self._filter_chain.append(new_instance)
 
-    def _zscale(self) -> ZscaleCommand:
+    def _zscale(self) -> ZscaleFilter:
         """Returns `ZscaleCommand` from the filter chain.
         If there is no such command, creates one."""
         if not self._use_zscale:
             raise Exception("_use_zscale is False")
-        return self._find_or_create_filter(ZscaleCommand)
+        return self._find_or_create_filter(ZscaleFilter)
 
     def _swscale(self) -> SwscaleFilter:
         """Returns `ZscaleCommand` from the filter chain.
@@ -113,7 +113,7 @@ class FfmpegCommand:
             raise Exception("_use_zscale is True")
         return self._find_or_create_filter(SwscaleFilter)
 
-    def _curr_scale_filter(self) -> Union[SwscaleFilter, ZscaleCommand]:
+    def _curr_scale_filter(self) -> Union[SwscaleFilter, ZscaleFilter]:
         if self._use_zscale:
             return self._zscale()
         else:
@@ -122,7 +122,7 @@ class FfmpegCommand:
     @property
     def scale(self) -> Optional[Scale]:
         if self._use_zscale:
-            zs: Optional[ZscaleCommand] = self._find_filter(ZscaleCommand)
+            zs: Optional[ZscaleFilter] = self._find_filter(ZscaleFilter)
             if zs is not None:
                 return zs.scaling
             return None
@@ -138,7 +138,7 @@ class FfmpegCommand:
     @scale.setter
     def scale(self, s: Scale):
         if self._use_zscale:
-            zs: ZscaleCommand = self._find_or_create_filter(ZscaleCommand)
+            zs: ZscaleFilter = self._find_or_create_filter(ZscaleFilter)
             zs.scaling = s
         else:
             sw: SwscaleFilter = self._find_or_create_filter(
