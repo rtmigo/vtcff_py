@@ -2,7 +2,7 @@
 
 **This project is a draft 🍏 and is not intended to be used by anyone.**
 
-The library is designed for transcoding between video formats with an emphasis
+`vtcff` is a library for transcoding between video formats with an emphasis
 on maintaining quality and color depth in studio pipelines.
 
 It generates arguments for `ffmpeg` – the least intuitive command line tool ever
