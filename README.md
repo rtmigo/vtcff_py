@@ -134,8 +134,8 @@ cmd.dst_range_full = False
 ```
 
 `use_zscale=True`, means that zimg will be used for conversions
-**explicitly** set by object properties. This is good because these 
-conversions will be of high quality.
+**explicitly** set by object properties. This is good because these conversions
+will be of high quality.
 
 However, **implicit** conversions may also be required. For example, before
 processing 16-bit PNG with `zscale`, we need to convert the pixel format from
@@ -190,6 +190,20 @@ cmd.dst_color_space = 'bt2020'
 
 # Target formats
 
+## Encoding to Apple ProRes
+
+```python3
+from vtcff import FfmpegCommand, Prores, ProresProfile
+
+cmd = FfmpegCommand()
+
+# by default it will encode to ProRes 4:2:2
+cmd.dst_codec_video = Prores()
+
+# encode to ProRes 4:2:2 HQ instead 
+cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
+```
+
 ## Encoding to  HEVC (H.265)
 
 ```python3
@@ -212,26 +226,14 @@ cmd.dst_codec_video = Hevc(mbps=100,
 ```
 
 By default, the `near_lossless` is set to slowest possible
-`VcPreset.N10_PLACEBO`, because we are trying to maximize quality.
+`VcPreset.N10_PLACEBO`, because we are trying to maximize quality. You will
+probably want to choose a faster preset so that the result appears within a
+lifetime.
 
 By default, the `lossless` is set to fastest possible
 `VcPreset.N1_ULTRAFAST`, because we are not losing any quality here. The
 resulting size will be roughly comparable to ProRes HQ/XQ and the encoding time
 is reasonable.
-
-## Encoding to Apple ProRes
-
-```python3
-from vtcff import FfmpegCommand, Prores, ProresProfile
-
-cmd = FfmpegCommand()
-
-# by default it will encode to ProRes 4:2:2
-cmd.dst_codec_video = Prores()
-
-# encode to ProRes 4:2:2 HQ instead 
-cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
-```
 
 # Images to videos
 
