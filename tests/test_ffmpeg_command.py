@@ -37,6 +37,11 @@ class BaseTest(unittest.TestCase):
         for x in items:
             self.assertNotIn(x, where)
 
+    def assertSwsFlags(self, cmd: FfmpegCommand):
+        self.assertIn(
+            '-sws_flags spline+accurate_rnd+full_chroma_int+full_chroma_inp',
+            str(cmd))
+
 
 class TestInputArg(BaseTest):
     def test_input_directory_as_frames(self):
@@ -99,6 +104,13 @@ class TestHevc(BaseTest):
         cmd.dst_codec_video = Hevc(preset=VcPreset.N2_SUPERFAST)
         self.assertAllIn(items, str(cmd))
 
+    def test_lossless(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec libx265', '-x265-params', 'lossless=1']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Hevc(lossless=True)
+        self.assertAllIn(items, str(cmd))
+
 
 class TestAvc(BaseTest):
     def test_base(self):
@@ -114,6 +126,54 @@ class TestAvc(BaseTest):
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Avc(preset=VcPreset.N5_FAST)
         self.assertAllIn(items, str(cmd))
+
+
+class TestsZscale(BaseTest):
+
+    def test_spline36_is_default(self):
+        cmd = create_test_cmd()
+
+        expected = ['filter=spline36',
+                    'zscale=']
+
+        self.assertNoneIn(expected, str(cmd))
+        cmd.scale = Scale(1920, 1080)
+        self.assertAllIn(expected, str(cmd))
+
+    def test_zscale_is_default(self):
+        cmd = FfmpegCommand()
+        cmd.src_file = "a"
+        cmd.dst_file = "b"
+        self.assertTrue(cmd._use_zscale)
+        cmd.scale = Scale(2048, 1920)
+        self.assertIn("zscale=", str(cmd))
+
+    def test_error_diffusion_is_default(self):
+        cmd = create_test_cmd()
+
+        expected = ['dither=error_diffusion',
+                    'zscale=']
+
+        self.assertNoneIn(expected, str(cmd))
+
+        cmd.dst_range_full = True
+        cmd.dst_range_full = False
+
+        self.assertAllIn(expected, str(cmd))
+
+    def test_zscale_scale(self):
+        cmd = create_test_cmd()
+
+        expected = ['filter=spline36',
+                    'w=1920:h=1080']
+
+        self.assertNoneIn(expected, str(cmd))
+
+        scaling = Scale(1920, 1080, False)
+        cmd.scale = scaling
+        self.assertEqual(cmd.scale, scaling)
+
+        self.assertAllIn(expected, str(cmd))
 
 
 class TestCommand(BaseTest):
@@ -277,66 +337,44 @@ class TestCommand(BaseTest):
     def test_swscale_scale(self):
         # todo test swscale quality flags
         with self.subTest("Constant"):
-            cmd = create_test_cmd()
+            cmd = create_test_cmd(zscale=False)
             expected = '-vf scale=width=1920:height=1080'
             self.assertNotIn(expected, str(cmd))
             scaling = Scale(1920, 1080, False)
             cmd.scale = scaling
             self.assertEqual(cmd.scale, scaling)
             self.assertIn(expected, str(cmd))
-            self.assert_sws_flags(cmd)
+            self.assertSwsFlags(cmd)
 
         with self.subTest("Downscale both"):
-            cmd = create_test_cmd()
+            cmd = create_test_cmd(zscale=False)
             expected = "-vf scale=width='min(iw,1920)':height='min(ih,1080)'"
             self.assertNotIn(expected, str(cmd))
             scaling = Scale(1920, 1080, True)
             cmd.scale = scaling
             self.assertEqual(cmd.scale, scaling)
             self.assertIn(expected, str(cmd))
-            self.assert_sws_flags(cmd)
+            self.assertSwsFlags(cmd)
 
         with self.subTest("Downscale height"):
-            cmd = create_test_cmd()
+            cmd = create_test_cmd(zscale=False)
             expected = "-vf scale=width=-2:height='min(ih,1080)'"
             self.assertNotIn(expected, str(cmd))
             scaling = Scale(-2, 1080, True)
             cmd.scale = scaling
             self.assertEqual(cmd.scale, scaling)
             self.assertIn(expected, str(cmd))
-            self.assert_sws_flags(cmd)
+            self.assertSwsFlags(cmd)
 
         with self.subTest("Downscale width"):
-            cmd = create_test_cmd()
+            cmd = create_test_cmd(zscale=False)
             expected = "-vf scale=width='min(iw,1920)':height=-1"
             self.assertNotIn(expected, str(cmd))
             scaling = Scale(1920, -1, True)
             cmd.scale = scaling
             self.assertEqual(cmd.scale, scaling)
             self.assertIn(expected, str(cmd))
-            self.assert_sws_flags(cmd)
-
-    def assert_sws_flags(self, cmd):
-        self.assertIn(
-            '-sws_flags spline+accurate_rnd+full_chroma_int+full_chroma_inp',
-            str(cmd))
-
-    def test_zscale_is_default_scaler(self):
-        cmd = create_test_cmd(zscale=True)
-        self.assertTrue(cmd._use_zscale)
-        cmd.scale = Scale(2048, 1920)
-        self.assertIn("zscale=", str(cmd))
-
-    def test_zscale_scale(self):
-        with self.subTest("Constant"):
-            cmd = create_test_cmd(zscale=True)
-            expected = '-vf zscale=filter=spline36:w=1920:h=1080'
-            self.assertNotIn(expected, str(cmd))
-            scaling = Scale(1920, 1080, False)
-            cmd.scale = scaling
-            self.assertEqual(cmd.scale, scaling)
-            self.assertIn(expected, str(cmd))
-            self.assert_sws_flags(cmd)
+            self.assertSwsFlags(cmd)
 
     def test_crop(self):
         cmd = create_test_cmd(zscale=True)
@@ -346,4 +384,4 @@ class TestCommand(BaseTest):
         cmd.crop = c
         self.assertEqual(cmd.crop, c)
         self.assertIn(expected, str(cmd))
-        self.assert_sws_flags(cmd)
+        self.assertSwsFlags(cmd)
