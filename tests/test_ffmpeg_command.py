@@ -111,6 +111,26 @@ class TestHevc(BaseTest):
         cmd.dst_codec_video = Hevc(lossless=True)
         self.assertAllIn(items, str(cmd))
 
+    def test_near_lossless(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec libx265', '-x265-params', 'cu-lossless=1:psy-rd=1.0:rd=3']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Hevc(near_lossless=True)
+        self.assertAllIn(items, str(cmd))
+
+    def test_bitrate(self):
+        cmd = create_test_cmd()
+        items = ['-vcodec libx265', '-x265-params', 'bitrate=50000']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_video = Hevc(bitrate_kbps=50000)
+        self.assertAllIn(items, str(cmd))
+
+
+    def test_lossless_and_near_losseless_cannot_be_used_both(self):
+        with self.assertRaises(Exception):
+            list(Hevc(lossless=True, near_lossless=True).args())
+
+
 
 class TestAvc(BaseTest):
     def test_base(self):
