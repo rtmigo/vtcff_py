@@ -48,15 +48,14 @@ class Hevc(Codec):
                 raise HevcBitrateSpecifiedForLosslessError
         else:
             if self.near_lossless:
-                # о сжатии без потерь и почти без потерь
                 # https://x265.readthedocs.io/en/stable/lossless.html
-                #
-                # летом 2017 я заметил, что при опциях "cu-lossless=1:psy-rd=1.0"
-                # стала появляться строка "x265 [warning]: --cu-lossless disabled,
-                # requires --rdlevel 3 or higher". Поэтому добавил опцию rd=3
 
                 params["cu-lossless"] = "1"
                 params["psy-rd"] = "1.0"
+
+                # without the following param we may get
+                # "x265 [warning]: --cu-lossless disabled,
+                # requires --rdlevel 3 or higher"
                 params["rd"] = "3"
                 # params["ssim"] = "1"  # ?!
 
@@ -64,8 +63,18 @@ class Hevc(Codec):
                 raise HevcBitrateNotSpecifiedError
             params["bitrate"] = str(round(self.mbps * 1000))
 
-        if self.preset is not None:
-            yield "-preset", str(self.preset.value)
+        p = self.preset
+        if p is None:
+            if self.lossless:
+                # we are not losing any quality here,
+                # we want better-than-prores result fast
+                p = VcPreset.N1_ULTRAFAST
+            elif self.near_lossless:
+                # safest bet is highest quality
+                p = VcPreset.N10_PLACEBO
+
+        if p is not None:
+            yield "-preset", str(p.value)
 
         if params:
             yield "-x265-params", colon_splitted_pairs(params)
