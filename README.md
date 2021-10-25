@@ -11,11 +11,25 @@ created.
 # Install
 
 ```bash
-$ pip3 install git+https://github.com/rtmigo/vtcff_py#egg=vtcff
+$ pip3 install vtcff
 ```
 
 This command will install the package, but not
 [ffmpeg](https://www.ffmpeg.org/) itself.
+
+<details>
+<summary>other options</summary>
+
+#### Install pre-release from GitHub:
+
+```bash
+$ pip3 install git+https://github.com/rtmigo/vtcff_py@staging#egg=vtcff
+```
+
+</details>
+
+
+
 
 # Basic example
 
