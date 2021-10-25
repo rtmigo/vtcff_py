@@ -10,7 +10,8 @@ class Scale(NamedTuple):
     downscale_only: bool = False
 
 
-def colon_splitted_pairs(items: Union[Dict[str, str], Iterable[Tuple[str,str]]]) -> str:
+def colon_splitted_pairs(
+        items: Union[Dict[str, str], Iterable[Tuple[str, str]]]) -> str:
     if isinstance(items, dict):
         items = items.items()
     return ':'.join(f"{k}={v}" for (k, v) in items)
