@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
-
+import random
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -8,9 +8,9 @@ from typing import List
 
 from tests.common import create_test_cmd, unique_item_after
 from vtcff import Crop, FfmpegCommand, Hevc, Avc
-from vtcff._codec_avc_preset import VcPreset
 from vtcff import HevcLosslessAndNearLosslessError, \
     HevcBitrateSpecifiedForLosslessError
+from vtcff._codec_avc_preset import VcPreset
 from vtcff._codec_prores_ks import Prores, ProresProfile
 from vtcff._common import Scale
 from vtcff._filter_transpose import Transpose
@@ -137,7 +137,6 @@ class TestHevc(BaseTest):
     def test_either_lossless_or_bitrate(self):
         with self.assertRaises(HevcBitrateSpecifiedForLosslessError):
             list(Hevc(lossless=True, mbps=100).args())
-
 
 
 class TestAvc(BaseTest):
@@ -408,7 +407,7 @@ class TestCommand(BaseTest):
         cmd = create_test_cmd(zscale=True)
 
         self.assertNotIn('1920', str(cmd))
-        cmd.scale = Scale(1920,1080)
+        cmd.scale = Scale(1920, 1080)
 
         self.assertIn('1920', str(cmd))
         self.assertNotIn('-vf scale=', str(cmd))
@@ -423,6 +422,42 @@ class TestCommand(BaseTest):
         self.assertIn('1920', str(cmd))
         self.assertNotIn('-vf scale=', str(cmd))
         self.assertIn('-vf zscale=', str(cmd))
+
+    def test_switch_zscale_to_swscale_random(self):
+
+        def random_bool():
+            return random.choice((True, False))
+
+        cmd = create_test_cmd()
+        for _ in range(10):
+            scale = Scale(width=random.randint(100, 200),
+                          height=random.randint(100, 200),
+                          downscale_only=random_bool())
+            src_range_full = random_bool()
+            dst_range_full = random_bool()
+            src_color = random.choice(('bt709', 'bt2020'))
+            dst_color = random.choice(('bt709', 'bt2020'))
+
+            cmd.scale = scale
+            cmd.src_range_full = src_range_full
+            cmd.dst_range_full = dst_range_full
+            cmd.src_color_space = src_color
+            cmd.dst_color_space = dst_color
+
+            cmd.use_zscale = random_bool()
+
+            self.assertEqual(cmd.scale, scale)
+            self.assertEqual(cmd.src_color_space, src_color)
+            self.assertEqual(cmd.dst_color_space, dst_color)
+            self.assertEqual(cmd.src_range_full, src_range_full)
+            self.assertEqual(cmd.dst_range_full, dst_range_full)
+
+            if cmd.use_zscale:
+                self.assertNotIn('-vf scale=', str(cmd))
+                self.assertIn('-vf zscale=', str(cmd))
+            else:
+                self.assertIn('-vf scale=', str(cmd))
+                self.assertNotIn('-vf zscale=', str(cmd))
 
     def test_crop(self):
         cmd = create_test_cmd(zscale=True)
