@@ -63,11 +63,11 @@ subprocess.run(list(cmd))
 
 # zscale vs scale
 
-These are two filters of a similar purpose.
+`ffmpeg` has two filters for color and frame size conversions:
 - [`scale`](https://ffmpeg.org/ffmpeg-filters.html#scale-1) ([libswscale](https://ffmpeg.org/libswscale.html)) is more versatile 
 - [`zscale`](https://ffmpeg.org/ffmpeg-filters.html#zscale-1) ([zimg](https://github.com/sekrit-twc/zimg)) gives a more predictable quality
 
-By default, `vtcff` uses `zscale` for color and size conversions. Sometimes it may lead to error "no path between colorspaces". This error would 
+By default, `vtcff` uses `zscale`. Sometimes it may lead to error "no path between colorspaces". This error would 
 not occur with `scale`.
 
 To switch to the `scale`, create object like this: 
@@ -75,8 +75,10 @@ To switch to the `scale`, create object like this:
 ```python3
 from vtcff import FfmpegCommand
 
-a = FfmpegCommand(use_zscale=False)  # use swscale 
+ffmpeg_with_swscale = FfmpegCommand(use_zscale=False)   
 ```
+
+No other code changes are required.
 
 # Crop and scale
 
