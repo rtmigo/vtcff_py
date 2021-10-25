@@ -9,6 +9,8 @@ from typing import List
 from tests.common import create_test_cmd
 from vtcff import Crop, FfmpegCommand, Hevc, Avc
 from vtcff._codec_avc_preset import VcPreset
+from vtcff import LosslessAndNearLosslessError, \
+    BitrateSpecifiedForLosslessError
 from vtcff._codec_prores_ks import Prores, ProresProfile
 from vtcff._common import Scale
 from vtcff._filter_transpose import Transpose
@@ -94,14 +96,14 @@ class TestHevc(BaseTest):
         cmd = create_test_cmd()
         items = ['-vcodec libx265']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Hevc()
+        cmd.dst_codec_video = Hevc(mbps=100)
         self.assertAllIn(items, str(cmd))
 
     def test_preset(self):
         cmd = create_test_cmd()
         items = ['-vcodec libx265', '-preset superfast']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Hevc(preset=VcPreset.N2_SUPERFAST)
+        cmd.dst_codec_video = Hevc(mbps=100, preset=VcPreset.N2_SUPERFAST)
         self.assertAllIn(items, str(cmd))
 
     def test_lossless(self):
@@ -113,22 +115,26 @@ class TestHevc(BaseTest):
 
     def test_near_lossless(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx265', '-x265-params', 'cu-lossless=1:psy-rd=1.0:rd=3']
+        items = ['-vcodec libx265', '-x265-params',
+                 'cu-lossless=1:psy-rd=1.0:rd=3']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Hevc(near_lossless=True)
+        cmd.dst_codec_video = Hevc(near_lossless=True, mbps=100)
         self.assertAllIn(items, str(cmd))
 
     def test_bitrate(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx265', '-x265-params', 'bitrate=50000']
+        items = ['-vcodec libx265', '-x265-params', 'bitrate=123500']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Hevc(bitrate_kbps=50000)
+        cmd.dst_codec_video = Hevc(mbps=123.5)
         self.assertAllIn(items, str(cmd))
 
-
     def test_lossless_and_near_losseless_cannot_be_used_both(self):
-        with self.assertRaises(Exception):
+        with self.assertRaises(LosslessAndNearLosslessError):
             list(Hevc(lossless=True, near_lossless=True).args())
+
+    def test_either_lossless_or_bitrate(self):
+        with self.assertRaises(BitrateSpecifiedForLosslessError):
+            list(Hevc(lossless=True, mbps=100).args())
 
 
 
