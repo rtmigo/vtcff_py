@@ -8,15 +8,15 @@ from ._codec_avc_preset import VcPreset
 from ._common import colon_splitted_pairs
 
 
-class BitrateNotSpecifiedError(Exception):
+class HevcBitrateNotSpecifiedError(Exception):
     pass
 
 
-class BitrateSpecifiedForLosslessError(Exception):
+class HevcBitrateSpecifiedForLosslessError(Exception):
     pass
 
 
-class LosslessAndNearLosslessError(Exception):
+class HevcLosslessAndNearLosslessError(Exception):
     pass
 
 
@@ -35,7 +35,7 @@ class Hevc(Codec):
     def args(self) -> Iterable[Tuple[str, str]]:
 
         if self.lossless and self.near_lossless:
-            raise LosslessAndNearLosslessError
+            raise HevcLosslessAndNearLosslessError
 
         yield "-vcodec", "libx265"
 
@@ -45,7 +45,7 @@ class Hevc(Codec):
             params["lossless"] = "1"
             # we should NOT specify bitrate for lossless encoding
             if self.mbps is not None:
-                raise BitrateSpecifiedForLosslessError
+                raise HevcBitrateSpecifiedForLosslessError
         else:
             if self.near_lossless:
                 # о сжатии без потерь и почти без потерь
@@ -61,7 +61,7 @@ class Hevc(Codec):
                 # params["ssim"] = "1"  # ?!
 
             if self.mbps is None:
-                raise BitrateNotSpecifiedError
+                raise HevcBitrateNotSpecifiedError
             params["bitrate"] = str(round(self.mbps * 1000))
 
         if self.preset is not None:
