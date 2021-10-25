@@ -14,8 +14,11 @@ def find_item_after(items: Iterable, findme):
             return next(it)
 
 
-def create_test_cmd(zscale=False) -> FfmpegCommand:
-    cmd = FfmpegCommand(use_zscale=zscale)
+def create_test_cmd(zscale=None) -> FfmpegCommand:
+    if zscale is not None:
+        cmd = FfmpegCommand(use_zscale=zscale)
+    else:
+        cmd = FfmpegCommand()
     cmd.src_file = "/tmp/path/to/src.mov"
     cmd.dst_file = "/tmp/path/to/dst.mov"
     return cmd
