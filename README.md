@@ -118,20 +118,22 @@ Arguments to be inserted after `-i source`:
 By default, `vtcff` uses `zscale`. Sometimes it may lead to error "no path
 between colorspaces". This error would not occur with `scale`.
 
-The `use_zscale` constructor argument determines which to use.
+The `use_zscale` property which to use.
 
 ```python3
 from vtcff import FfmpegCommand, Scale
 
-a = FfmpegCommand(use_zscale=False)
-a.scale = Scale(1920, 1080)  # will be done by libswscale
-a.dst_color_space = 'bt709'  # will be done by libswscale
-a.dst_range_full = False  # will be done by libswscale
+cmd = FfmpegCommand()
 
-b = FfmpegCommand()
-b.scale = Scale(1920, 1080)  # will be done by zimg
-b.dst_color_space = 'bt709'  # will be done by zimg
-b.dst_range_full = False  # will be done by zimg
+assert cmd.use_zscale  # by default, it's zscale (zimg) 
+cmd.use_zscale = False # switching to libswscale
+
+# properties affected:
+cmd.scale = Scale(1920, 1080)
+cmd.src_color_space = 'bt709'
+cmd.dst_color_space = 'bt709'
+cmd.src_range_full = False  
+cmd.dst_range_full = False
 ```
 
 # Crop and scale
@@ -199,14 +201,18 @@ cmd.dst_codec_video = Hevc(near_lossless=True, mbps=100)
 # default quality
 cmd.dst_codec_video = Hevc(mbps=100)
 
-# all modes support speed presets
-cmd.dst_codec_video = Hevc(mbps=100, near_lossless=True, 
-                           preset=VcPreset.N9_VERYSLOW)
-cmd.dst_codec_video = Hevc(lossless=True,
-                           preset=VcPreset.N2_SUPERFAST)
+# all modes can be tweaked with optional speed presets:
 cmd.dst_codec_video = Hevc(mbps=100,
-                           preset=VcPreset.N6_MEDIUM)
+                           preset=VcPreset.N7_SLOW)
 ```
+
+By default, the `near_lossless` is set to slowest possible
+`VcPreset.N10_PLACEBO`, because we are trying to maximize quality.
+
+By default, the `lossless` is set to fastest possible
+`VcPreset.N1_ULTRAFAST`, because we are not losing any quality here. The 
+resulting size will be roughly comparable to ProRes HQ/XQ and the encoding time
+is reasonable.
 
 ## Encoding to Apple ProRes
 

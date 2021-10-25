@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import List
 
-from tests.common import create_test_cmd
+from tests.common import create_test_cmd, unique_item_after
 from vtcff import Crop, FfmpegCommand, Hevc, Avc
 from vtcff._codec_avc_preset import VcPreset
 from vtcff import HevcLosslessAndNearLosslessError, \
@@ -112,6 +112,7 @@ class TestHevc(BaseTest):
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Hevc(lossless=True)
         self.assertAllIn(items, str(cmd))
+        self.assertEqual(unique_item_after(cmd, "-preset"), 'ultrafast')
 
     def test_near_lossless(self):
         cmd = create_test_cmd()
@@ -120,6 +121,7 @@ class TestHevc(BaseTest):
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Hevc(near_lossless=True, mbps=100)
         self.assertAllIn(items, str(cmd))
+        self.assertEqual(unique_item_after(cmd, "-preset"), 'placebo')
 
     def test_bitrate(self):
         cmd = create_test_cmd()
@@ -402,6 +404,26 @@ class TestCommand(BaseTest):
             self.assertIn(expected, str(cmd))
             self.assertSwsFlags(cmd)
 
+    def test_switch_zscale_to_swscale(self):
+        cmd = create_test_cmd(zscale=True)
+
+        self.assertNotIn('1920', str(cmd))
+        cmd.scale = Scale(1920,1080)
+
+        self.assertIn('1920', str(cmd))
+        self.assertNotIn('-vf scale=', str(cmd))
+        self.assertIn('-vf zscale=', str(cmd))
+
+        cmd.use_zscale = False
+        self.assertIn('1920', str(cmd))
+        self.assertIn('-vf scale=', str(cmd))
+        self.assertNotIn('-vf zscale=', str(cmd))
+
+        cmd.use_zscale = True
+        self.assertIn('1920', str(cmd))
+        self.assertNotIn('-vf scale=', str(cmd))
+        self.assertIn('-vf zscale=', str(cmd))
+
     def test_crop(self):
         cmd = create_test_cmd(zscale=True)
         expected = '-vf crop=100:200:10:20'
@@ -411,3 +433,8 @@ class TestCommand(BaseTest):
         self.assertEqual(cmd.crop, c)
         self.assertIn(expected, str(cmd))
         self.assertSwsFlags(cmd)
+
+    def test_pixfmt(self):
+        cmd = create_test_cmd(zscale=True)
+        cmd.dst_pixfmt = "yuvj420p"
+        self.assertEqual(unique_item_after(cmd, "-pix_fmt"), "yuvj420p")
