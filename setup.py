@@ -30,7 +30,7 @@ setup(
         "Development Status :: 2 - Pre-Alpha",
         'License :: OSI Approved :: BSD License',
         "Programming Language :: Python :: 3.9",
-        "Environment :: Console",
+        "Programming Language :: Python :: 3.10",
         "Typing :: Typed",
         "Operating System :: POSIX",
         "Operating System :: Microsoft :: Windows"
