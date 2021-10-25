@@ -3,8 +3,8 @@
 
 from ._codec_avc import Avc
 from ._codec_avc_preset import VcPreset
-from ._codec_hevc import Hevc, VcPreset, BitrateSpecifiedForLosslessError, \
-    BitrateNotSpecifiedError, LosslessAndNearLosslessError
+from ._codec_hevc import Hevc, VcPreset, HevcBitrateSpecifiedForLosslessError, \
+    HevcBitrateNotSpecifiedError, HevcLosslessAndNearLosslessError
 from ._codec_prores_ks import Prores, ProresProfile
 from ._command import FfmpegCommand
 from ._common import Scale

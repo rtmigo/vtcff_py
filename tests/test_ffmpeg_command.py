@@ -9,8 +9,8 @@ from typing import List
 from tests.common import create_test_cmd
 from vtcff import Crop, FfmpegCommand, Hevc, Avc
 from vtcff._codec_avc_preset import VcPreset
-from vtcff import LosslessAndNearLosslessError, \
-    BitrateSpecifiedForLosslessError
+from vtcff import HevcLosslessAndNearLosslessError, \
+    HevcBitrateSpecifiedForLosslessError
 from vtcff._codec_prores_ks import Prores, ProresProfile
 from vtcff._common import Scale
 from vtcff._filter_transpose import Transpose
@@ -129,11 +129,11 @@ class TestHevc(BaseTest):
         self.assertAllIn(items, str(cmd))
 
     def test_lossless_and_near_losseless_cannot_be_used_both(self):
-        with self.assertRaises(LosslessAndNearLosslessError):
+        with self.assertRaises(HevcLosslessAndNearLosslessError):
             list(Hevc(lossless=True, near_lossless=True).args())
 
     def test_either_lossless_or_bitrate(self):
-        with self.assertRaises(BitrateSpecifiedForLosslessError):
+        with self.assertRaises(HevcBitrateSpecifiedForLosslessError):
             list(Hevc(lossless=True, mbps=100).args())
 
 
