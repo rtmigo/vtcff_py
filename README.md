@@ -163,7 +163,6 @@ Converting timelapses or CGI frame sequences to ProRes video file.
 import subprocess
 from vtcff import FfmpegCommand, Prores, ProresProfile
 
-# use zscale (zimg) for color conversions
 cmd = FfmpegCommand()
 
 # input directory will be automatically transformed 
