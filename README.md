@@ -75,7 +75,7 @@ To switch to the `scale`, create object like this:
 ```python3
 from vtcff import FfmpegCommand
 
-ffmpeg_with_swscale = FfmpegCommand(use_zscale=False)   
+cmd = FfmpegCommand(use_zscale=False)  # will use scale (libswscale)   
 ```
 
 No other code changes are required.
