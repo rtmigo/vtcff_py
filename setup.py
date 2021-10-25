@@ -16,7 +16,7 @@ setup(
 
     packages=find_packages(include=['vtcff', 'vtcff.*']),
 
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     install_requires=['framefile'],
 
     description="Ffmpeg wrapper for transcoding between video formats with "
@@ -35,6 +35,7 @@ setup(
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         'License :: OSI Approved :: BSD License',
+        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Typing :: Typed",
