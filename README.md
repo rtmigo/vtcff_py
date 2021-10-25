@@ -76,14 +76,17 @@ cmd.custom.video.string = "-vcodec libx265"
 cmd.custom.video.string += "-x265-params lossless=1"
 
 # or as list
-cmd.custom.video.string.list = ["-vcodec", "libx265"]
-cmd.custom.video.string.list.extend(["-x265-params", "lossless=1"])
+cmd.custom.video.list = ["-vcodec", "libx265"]
+cmd.custom.video.list.extend(["-x265-params", "lossless=1"])
 ```
 
-The `cmd.custom` contains four fields, that can me modified independently:
+The `cmd.custom` contains four fields, that can be modified independently.
 
-- `custom.before_i` (will be inserted before `-i` ffmpeg argument)
-- `custom.after_i` (will be inserted after `-i` ffmpeg argument)
+Arguments to be inserted before `-i source`:
+- `custom.before_i`
+
+Arguments to be inserted after `-i source`:
+- `custom.after_i`
 - `custom.video` 
 - `custom.audio`
 
@@ -150,7 +153,6 @@ cmd.scale = Scale(-2, 1080)
 ```python3
 from vtcff import FfmpegCommand
 
-# use zscale (zimg) for color conversions
 cmd = FfmpegCommand()
 
 # Full/Data/PC range to Limited/Video/TV
