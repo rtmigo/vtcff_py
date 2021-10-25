@@ -16,8 +16,12 @@ setup(
 
     packages=find_packages(include=['vtcff', 'vtcff.*']),
 
-    python_requires='>=3.9',
+    python_requires='>=3.7',
     install_requires=['framefile'],
+
+    description="Ffmpeg wrapper for transcoding between video formats with "
+                "an emphasis on maintaining quality and color depth "
+                "in video production pipelines",
 
     long_description=readme,
     long_description_content_type='text/markdown',
