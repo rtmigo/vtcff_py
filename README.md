@@ -181,10 +181,11 @@ cmd.src_color_space = 'bt709'
 cmd.dst_color_space = 'bt2020'
 ```
 
-# HEVC (H.265)
+# Target formats
+
+## Encoding to  HEVC (H.265)
 
 ```python3
-import subprocess
 from vtcff import FfmpegCommand, Hevc, VcPreset
 
 cmd = FfmpegCommand()
@@ -207,8 +208,22 @@ cmd.dst_codec_video = Hevc(mbps=100,
                            preset=VcPreset.N6_MEDIUM)
 ```
 
+## Encoding to Apple ProRes
 
-# Timelapse
+```python3
+from vtcff import FfmpegCommand, Prores, ProresProfile
+
+cmd = FfmpegCommand()
+
+# by default it will encode to ProRes 4:2:2
+cmd.dst_codec_video = Prores()
+
+# encode to ProRes 4:2:2 HQ instead 
+cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
+```
+
+
+# Images to videos
 
 Converting timelapses or CGI frame sequences to ProRes video file.
 
