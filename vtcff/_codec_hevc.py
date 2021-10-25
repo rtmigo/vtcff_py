@@ -9,16 +9,44 @@ from ._common import colon_splitted_pairs
 
 
 class Hevc(Codec):
-    def __init__(self, preset: VcPreset = None, lossless: bool = False):
+    def __init__(self,
+                 preset: VcPreset = None,
+                 lossless: bool = False,
+                 near_lossless: bool = False,
+                 bitrate_kbps: int = None):
+
         self.preset: Optional[VcPreset] = preset
         self.lossless = lossless
+        self.near_lossless = near_lossless
+        self.bitrate_kbps = bitrate_kbps
 
     def args(self) -> Iterable[Tuple[str, str]]:
+
+        if self.lossless and self.near_lossless:
+            raise ValueError("Cannot specify both lossless and near_lossless")
+
         yield "-vcodec", "libx265"
 
         params = dict()
+
         if self.lossless:
             params["lossless"] = "1"
+
+        if self.near_lossless:
+            # о сжатии без потерь и почти без потерь
+            # https://x265.readthedocs.io/en/stable/lossless.html
+            #
+            # летом 2017 я заметил, что при опциях "cu-lossless=1:psy-rd=1.0"
+            # стала появляться строка "x265 [warning]: --cu-lossless disabled,
+            # requires --rdlevel 3 or higher". Поэтому добавил опцию rd=3
+
+            params["cu-lossless"] = "1"
+            params["psy-rd"] = "1.0"
+            params["rd"] = "3"
+            # params["ssim"] = "1"  # ?!
+
+        if self.bitrate_kbps is not None:
+            params["bitrate"] = "%d" % self.bitrate_kbps
 
         if self.preset is not None:
             yield "-preset", str(self.preset.value)
