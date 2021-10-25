@@ -11,7 +11,7 @@ class Hevc(Codec):
     def __init__(self, preset: VcPreset = None):
         self.preset: Optional[VcPreset] = preset
 
-    def __iter__(self) -> Iterable[Tuple[str, str]]:
+    def args(self) -> Iterable[Tuple[str, str]]:
         yield "-vcodec", "libx265"
 
         if self.preset is not None:

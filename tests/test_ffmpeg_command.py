@@ -4,6 +4,7 @@
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import List
 
 from tests.common import create_test_cmd
 from vtcff import Crop, FfmpegCommand, Hevc, Avc
@@ -13,8 +14,18 @@ from vtcff._common import Scale
 from vtcff._filter_transpose import Transpose
 
 
-def rindex(alist, value):
-    return len(alist) - alist[-1::-1].index(value) - 1
+def last_index(alist: List, value) -> int:
+    result = len(alist) - alist[-1::-1].index(value) - 1
+    if result < 0:
+        raise ValueError("item not found")
+    return result
+
+
+def first_index(alist: List, value) -> int:
+    result = alist.index(value)
+    if result < 0:
+        raise ValueError("item not found")
+    return result
 
 
 class BaseTest(unittest.TestCase):
@@ -189,11 +200,11 @@ class TestCommand(BaseTest):
         cmd.dst_color_space = 'bt709'
         self.assertIn('-colorspace bt709', str(cmd))
 
-        cmd.override_video.list.extend(['-colorspace', 'bt2020'])
+        cmd.custom.video.list.extend(['-colorspace', 'bt2020'])
         self.assertNotIn('-colorspace bt709', str(cmd))
         self.assertIn('-colorspace bt2020', str(cmd))
 
-        cmd.override_video.string = '-colorspace bt601'
+        cmd.custom.video.string = '-colorspace bt601'
         self.assertNotIn('-colorspace bt709', str(cmd))
         self.assertNotIn('-colorspace bt2020', str(cmd))
         self.assertIn('-colorspace bt601', str(cmd))
@@ -201,8 +212,16 @@ class TestCommand(BaseTest):
     def test_override_unset_param(self):
         cmd = create_test_cmd()
         self.assertNotIn('-eniki beniki', str(cmd))
-        cmd.override_general.string = '-eniki beniki'
+        cmd.custom.after_i.string = '-eniki beniki'
         self.assertIn('-eniki beniki', str(cmd))
+
+    def test_custom_before_i(self):
+        cmd = create_test_cmd()
+        val = "-delta 5"
+        self.assertNotIn(val, str(cmd))
+        cmd.custom.before_i.string = val
+        self.assertIn(val, str(cmd))
+        self.assertOrderIs(cmd, '-delta', '-i')
 
     def test_time_range_in(self):
         cmd = create_test_cmd()
@@ -212,8 +231,7 @@ class TestCommand(BaseTest):
         self.assertIn(expected, str(cmd))
 
         # убедимся, что оно после -i
-        args = list(cmd)
-        self.assertGreater(args.index('-ss'), rindex(args, '-i'))
+        self.assertOrderIs(cmd, '-i', '-ss')
 
     def test_time_range_duration(self):
         cmd = create_test_cmd()
@@ -223,8 +241,12 @@ class TestCommand(BaseTest):
         self.assertIn(expected, str(cmd))
 
         # убедимся, что оно после -i
-        args = list(cmd)
-        self.assertGreater(args.index('-t'), rindex(args, '-i'))
+        self.assertOrderIs(cmd, '-i', '-t')
+        # self.assertGreater(last_index(args, '-t'), first_index(args, '-i'))
+
+    def assertOrderIs(self, items, left, right):
+        items = list(items)
+        self.assertLess(last_index(items, left), first_index(items, right))
 
     def test_time_range_in_none_zero(self):
         cmd = create_test_cmd()
@@ -242,7 +264,7 @@ class TestCommand(BaseTest):
 
             # убедимся, что оно после -i
             args = list(cmd)
-            self.assertGreater(args.index('-ss'), rindex(args, '-i'))
+            self.assertGreater(args.index('-ss'), last_index(args, '-i'))
 
     def test_transpose(self):
         cmd = create_test_cmd()
