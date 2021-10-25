@@ -1,6 +1,6 @@
 # [vtcff](https://github.com/rtmigo/vtcff_py)
 
-**This project is a draft 🍏 and is not intended to be used by anyone.**
+**🚧 This project is a draft and is not intended to be used by anyone.**
 
 `vtcff` is a library for transcoding between video formats with an emphasis on
 maintaining quality and color depth in video production pipelines.
@@ -28,9 +28,6 @@ $ pip3 install git+https://github.com/rtmigo/vtcff_py@staging#egg=vtcff
 
 </details>
 
-
-
-
 # Basic example
 
 ```python3
@@ -47,7 +44,7 @@ cmd.scale = Scale(1920, 1080)
 cmd.transpose = Transpose.CLOCKWISE
 
 # set compression format
-cmd.dst_codec_video = Hevc()
+cmd.dst_codec_video = Hevc(mbps=100)
 
 # run command
 subprocess.check_call(list(cmd))
@@ -57,18 +54,18 @@ subprocess.check_call(list(cmd))
 
 ```python3
 import subprocess, os
-from vtcff import FfmpegCommand, Hevc
+from vtcff import FfmpegCommand, Prores
 
 cmd = FfmpegCommand()
 cmd.src_file = 'source.mov'
 cmd.dst_file = 'target.mov'
-cmd.dst_codec_video = Hevc()
+cmd.dst_codec_video = Prores()
 
 print(str(cmd))
-# ffmpeg -i source.mov -vcodec libx265 target.mov
+# ffmpeg -i source.mov -vcodec prores_ks target.mov
 
 print(list(cmd))
-# ['ffmpeg', '-i', 'source.mov', '-vcodec', 'libx265', 'target.mov']
+# ['ffmpeg', '-i', 'source.mov', '-vcodec', 'prores_ks', 'target.mov']
 
 # running in different ways:
 os.system(str(cmd))
@@ -118,21 +115,28 @@ Arguments to be inserted after `-i source`:
 By default, `vtcff` uses `zscale`. Sometimes it may lead to error "no path
 between colorspaces". This error would not occur with `scale`.
 
-The `use_zscale` constructor argument determines which to use.
+The `use_zscale` property which to use.
 
 ```python3
 from vtcff import FfmpegCommand, Scale
 
-a = FfmpegCommand(use_zscale=False)
-a.scale = Scale(1920, 1080)  # will be done by libswscale
-a.dst_color_space = 'bt709'  # will be done by libswscale
-a.dst_range_full = False  # will be done by libswscale
+cmd = FfmpegCommand()
 
-b = FfmpegCommand()
-b.scale = Scale(1920, 1080)  # will be done by zimg
-b.dst_color_space = 'bt709'  # will be done by zimg
-b.dst_range_full = False  # will be done by zimg
+assert cmd.use_zscale  # by default, it's zscale (zimg) 
+cmd.use_zscale = False  # switching to libswscale
+
+# properties affected:
+cmd.scale = Scale(1920, 1080)
+cmd.src_color_space = 'bt709'
+cmd.dst_color_space = 'bt709'
+cmd.src_range_full = False
+cmd.dst_range_full = False
 ```
+
+It is worth clarifying that even with `use_zscale=True`, the use of the usage 
+of zimg library is guaranteed only for *explicit* conversions specified by the properties
+of the `FfmpegCommand` object. If the input/output formats or filter combination
+would require implicit color conversions, ffmpeg may use libswscale to do this.
 
 # Crop and scale
 
@@ -181,7 +185,52 @@ cmd.src_color_space = 'bt709'
 cmd.dst_color_space = 'bt2020'
 ```
 
-# Timelapse
+# Target formats
+
+## Encoding to  HEVC (H.265)
+
+```python3
+from vtcff import FfmpegCommand, Hevc, VcPreset
+
+cmd = FfmpegCommand()
+
+# ideal quality
+cmd.dst_codec_video = Hevc(lossless=True)
+
+# best for bitrate quality
+cmd.dst_codec_video = Hevc(near_lossless=True, mbps=100)
+
+# default quality
+cmd.dst_codec_video = Hevc(mbps=100)
+
+# all modes can be tweaked with optional speed presets:
+cmd.dst_codec_video = Hevc(mbps=100,
+                           preset=VcPreset.N7_SLOW)
+```
+
+By default, the `near_lossless` is set to slowest possible
+`VcPreset.N10_PLACEBO`, because we are trying to maximize quality.
+
+By default, the `lossless` is set to fastest possible
+`VcPreset.N1_ULTRAFAST`, because we are not losing any quality here. The
+resulting size will be roughly comparable to ProRes HQ/XQ and the encoding time
+is reasonable.
+
+## Encoding to Apple ProRes
+
+```python3
+from vtcff import FfmpegCommand, Prores, ProresProfile
+
+cmd = FfmpegCommand()
+
+# by default it will encode to ProRes 4:2:2
+cmd.dst_codec_video = Prores()
+
+# encode to ProRes 4:2:2 HQ instead 
+cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
+```
+
+# Images to videos
 
 Converting timelapses or CGI frame sequences to ProRes video file.
 

@@ -66,6 +66,7 @@ class FfmpegCommand:
         self._dst_colorspace_meta: Optional[str] = None
 
         self.dst_codec_video: Optional[Codec] = None
+        self.dst_pixfmt: Optional[str] = None
 
         # про -color_range
         # https://trac.ffmpeg.org/ticket/443
@@ -114,8 +115,17 @@ class FfmpegCommand:
             if isinstance(item, obj_type):
                 self._filter_chain[idx] = new_instance
                 return
-
         self._filter_chain.append(new_instance)
+
+    def _remove_filter(self, obj_type):
+        items_removed = 0
+        for idx, item in enumerate(self._filter_chain):
+            if isinstance(item, obj_type):
+                del self._filter_chain[idx]
+                items_removed+=1
+
+        assert 0<=items_removed<=1
+
 
     def _zscale(self) -> ZscaleFilter:
         """Returns `ZscaleCommand` from the filter chain.
@@ -138,6 +148,39 @@ class FfmpegCommand:
             return self._swscale()
 
     @property
+    def use_zscale(self):
+        return self._use_zscale
+
+    @use_zscale.setter
+    def use_zscale(self, x: bool):
+        if x == self._use_zscale:
+            return
+
+        old_scale = self.scale
+        old_src_range_full = self.src_range_full
+        old_dst_range_full = self.dst_range_full
+        old_src_color_space = self.src_color_space
+        old_dst_color_space = self.dst_color_space
+
+        if self._use_zscale:
+            self._remove_filter(ZscaleFilter)
+        else:
+            self._remove_filter(SwscaleFilter)
+
+        # self.scale = None
+        # self.src_range_full = None
+        # self.dst_range_full = None
+        # self.src_color_space = None
+        # self.dst_color_space = None
+
+        self._use_zscale = x
+        self.scale = old_scale
+        self.src_range_full = old_src_range_full
+        self.dst_range_full = old_dst_range_full
+        self.src_color_space = old_src_color_space
+        self.dst_color_space = old_dst_color_space
+
+    @property
     def scale(self) -> Optional[Scale]:
         if self._use_zscale:
             zs: Optional[ZscaleFilter] = self._find_filter(ZscaleFilter)
@@ -154,15 +197,20 @@ class FfmpegCommand:
             return None
 
     @scale.setter
-    def scale(self, s: Scale):
+    def scale(self, s: Optional[Scale]):
+
         if self._use_zscale:
             zs: ZscaleFilter = self._find_or_create_filter(ZscaleFilter)
             zs.scaling = s
         else:
-            sw: SwscaleFilter = self._find_or_create_filter(
-                SwscaleFilter)
-            sw.width, sw.height = s.width, s.height
-            sw.downscale_only = s.downscale_only
+            sw: SwscaleFilter = self._find_or_create_filter(SwscaleFilter)
+            if s is not None:
+                sw.width, sw.height = s.width, s.height
+                sw.downscale_only = s.downscale_only
+            else:
+                sw.width = None
+                sw.height = None
+                sw.downscale_only = False
 
     @property
     def transpose(self) -> Optional[Transpose]:
@@ -305,6 +353,9 @@ class FfmpegCommand:
         if self.dst_codec_video is not None:
             for pair in self.dst_codec_video.args():
                 yield pair
+
+        if self.dst_pixfmt:
+            yield '-pix_fmt', self.dst_pixfmt
 
         # странные параметры, которые определяют "метаданные" результирующего
         # видео. В итоге оно при кодировании выглядит например как

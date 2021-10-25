@@ -3,6 +3,7 @@
 
 from typing import Optional
 
+from vtcff._common import frame_dimension_spec
 from vtcff._filter_base import FilterBase
 from vtcff._filter_zscale import _full_limited_none, _bool_to_full_limited_none
 
@@ -78,15 +79,17 @@ class SwscaleFilter(FilterBase):
 
     def __str__(self) -> str:
         final_pairs = dict(self._pairs)
-        if self.downscale_only:
-            if self.width is not None:
-                final_pairs["width"] = (f"'min(iw,{self.width})'"
-                                        if self.width > 0 else str(self.width))
-            if self.height is not None:
-                final_pairs["height"] = (f"'min(ih,{self.height})'"
-                                         if self.height > 0 else str(
-                    self.height))
-        else:
-            final_pairs["width"] = str(self.width)
-            final_pairs["height"] = str(self.height)
+        if self.width is not None:
+            final_pairs["width"] = frame_dimension_spec(
+                iw_or_ih='iw',
+                value=self.width,
+                downscale_only=self.downscale_only)
+        if self.height is not None:
+            final_pairs["height"] = frame_dimension_spec(
+                iw_or_ih='ih',
+                value=self.height,
+                downscale_only=self.downscale_only)
+        # else:
+        #     final_pairs["width"] = str(self.width)
+        #     final_pairs["height"] = str(self.height)
         return self._to_string("scale", final_pairs.items())

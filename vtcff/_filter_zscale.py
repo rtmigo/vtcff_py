@@ -3,7 +3,7 @@
 
 from typing import Optional
 
-from vtcff._common import Scale
+from vtcff._common import Scale, frame_dimension_spec
 from vtcff._filter_base import FilterBase
 
 
@@ -74,11 +74,16 @@ class ZscaleFilter(FilterBase):
 
         all_pairs = dict()
         if self.scaling is not None:
-            if self.scaling.downscale_only:
-                raise NotImplementedError
             all_pairs["filter"] = 'spline36'
-            all_pairs["w"] = str(self.scaling.width)
-            all_pairs["h"] = str(self.scaling.height)
+            # todo test downscale_only
+            all_pairs["w"] = frame_dimension_spec(
+                iw_or_ih='iw',
+                value=self.scaling.width,
+                downscale_only=self.scaling.downscale_only)
+            all_pairs["h"] = frame_dimension_spec(
+                iw_or_ih='ih',
+                value=self.scaling.height,
+                downscale_only=self.scaling.downscale_only)
 
         for k, v in self._pairs.items():
             all_pairs[k] = v

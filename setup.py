@@ -8,7 +8,7 @@ readme = (Path(__file__).parent / 'README.md').read_text(encoding="utf-8")
 
 setup(
     name=name,
-    version='0.1.0',
+    version='0.2.0',
 
     author="Artёm IG",
     author_email="ortemeo@gmail.com",
@@ -34,7 +34,7 @@ setup(
 
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
-        'License :: OSI Approved :: BSD License',
+        'License :: OSI Approved :: MIT License',
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
