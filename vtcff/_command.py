@@ -81,6 +81,8 @@ class FfmpegCommand:
         # then in fields of the following object
         self.custom = FfmpegCommand.CustomArgs()
 
+        self.debug = False
+
     @property
     def override_general(self) -> ArgsSubset:
         warnings.warn("Use .custom.after_i", DeprecationWarning)  # 2021-10
@@ -122,10 +124,9 @@ class FfmpegCommand:
         for idx, item in enumerate(self._filter_chain):
             if isinstance(item, obj_type):
                 del self._filter_chain[idx]
-                items_removed+=1
+                items_removed += 1
 
-        assert 0<=items_removed<=1
-
+        assert 0 <= items_removed <= 1
 
     def _zscale(self) -> ZscaleFilter:
         """Returns `ZscaleCommand` from the filter chain.
@@ -166,12 +167,6 @@ class FfmpegCommand:
             self._remove_filter(ZscaleFilter)
         else:
             self._remove_filter(SwscaleFilter)
-
-        # self.scale = None
-        # self.src_range_full = None
-        # self.dst_range_full = None
-        # self.src_color_space = None
-        # self.dst_color_space = None
 
         self._use_zscale = x
         self.scale = old_scale
@@ -377,11 +372,17 @@ class FfmpegCommand:
         yield ('-sws_flags',
                'spline+accurate_rnd+full_chroma_int+full_chroma_inp')
 
+        if self.debug:
+            yield '-loglevel', 'debug'
+
         # последним в списке аргументов должно идти имя целевого файла.
         # Но здесь мы его не возвращаем - метод __iter__ добавит перед именем
         # файла еще что-то - и потом сам допишет имя
 
-    # def _iter_known(self):
+    def _log_file_name(self) -> str:
+        # todo test
+        return self.dst_file + ".log"
+        # if framefile.is_pattern(self.dst_file,)
 
     def _combine_overrides(self, src: Iterable[Dict[str, Optional[str]]]) \
             -> Dict[str, Optional[str]]:

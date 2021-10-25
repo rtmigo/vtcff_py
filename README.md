@@ -115,28 +115,31 @@ Arguments to be inserted after `-i source`:
 By default, `vtcff` uses `zscale`. Sometimes it may lead to error "no path
 between colorspaces". This error would not occur with `scale`.
 
-The `use_zscale` property which to use.
+The `use_zscale` property determines which filter to use.
 
 ```python3
 from vtcff import FfmpegCommand, Scale
 
 cmd = FfmpegCommand()
 
-assert cmd.use_zscale  # by default, it's zscale (zimg) 
-cmd.use_zscale = False  # switching to libswscale
+assert cmd.use_zscale  # by default, it's 'zscale' (zimg) 
+cmd.use_zscale = False  # switching to 'scale' (libswscale)
 
 # properties affected:
 cmd.scale = Scale(1920, 1080)
 cmd.src_color_space = 'bt709'
-cmd.dst_color_space = 'bt709'
-cmd.src_range_full = False
+cmd.dst_color_space = 'bt2020'
+cmd.src_range_full = True
 cmd.dst_range_full = False
 ```
 
-It is worth clarifying that even with `use_zscale=True`, the use of the usage 
-of zimg library is guaranteed only for *explicit* conversions specified by the properties
-of the `FfmpegCommand` object. If the input/output formats or filter combination
-would require implicit color conversions, ffmpeg may use libswscale to do this.
+`use_zscale=True`, means that zimg will be used for conversions
+**explicitly** set by object properties. This is good because these 
+conversions will be of high quality.
+
+However, **implicit** conversions may also be required. For example, before
+processing 16-bit PNG with `zscale`, we need to convert the pixel format from
+`rgba64be` to `gbrap16le` 🤪. Ffmpeg will do it automatically with `libswscale`.
 
 # Crop and scale
 
