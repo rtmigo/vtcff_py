@@ -43,6 +43,7 @@ class Hevc(Codec):
 
         if self.lossless:
             params["lossless"] = "1"
+            # we should NOT specify bitrate for lossless encoding
             if self.mbps is not None:
                 raise BitrateSpecifiedForLosslessError
         else:

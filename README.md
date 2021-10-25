@@ -47,7 +47,7 @@ cmd.scale = Scale(1920, 1080)
 cmd.transpose = Transpose.CLOCKWISE
 
 # set compression format
-cmd.dst_codec_video = Hevc()
+cmd.dst_codec_video = Hevc(mbps=100)
 
 # run command
 subprocess.check_call(list(cmd))
@@ -57,18 +57,18 @@ subprocess.check_call(list(cmd))
 
 ```python3
 import subprocess, os
-from vtcff import FfmpegCommand, Hevc
+from vtcff import FfmpegCommand, Prores
 
 cmd = FfmpegCommand()
 cmd.src_file = 'source.mov'
 cmd.dst_file = 'target.mov'
-cmd.dst_codec_video = Hevc()
+cmd.dst_codec_video = Prores()
 
 print(str(cmd))
-# ffmpeg -i source.mov -vcodec libx265 target.mov
+# ffmpeg -i source.mov -vcodec prores_ks target.mov
 
 print(list(cmd))
-# ['ffmpeg', '-i', 'source.mov', '-vcodec', 'libx265', 'target.mov']
+# ['ffmpeg', '-i', 'source.mov', '-vcodec', 'prores_ks', 'target.mov']
 
 # running in different ways:
 os.system(str(cmd))
@@ -180,6 +180,33 @@ cmd.dst_range_full = False
 cmd.src_color_space = 'bt709'
 cmd.dst_color_space = 'bt2020'
 ```
+
+# HEVC (H.265)
+
+```python3
+import subprocess
+from vtcff import FfmpegCommand, Hevc, VcPreset
+
+cmd = FfmpegCommand()
+
+# ideal quality
+cmd.dst_codec_video = Hevc(lossless=True)
+
+# best for bitrate quality
+cmd.dst_codec_video = Hevc(near_lossless=True, mbps=100)
+
+# default quality
+cmd.dst_codec_video = Hevc(mbps=100)
+
+# all modes support speed presets
+cmd.dst_codec_video = Hevc(mbps=100, near_lossless=True, 
+                           preset=VcPreset.N9_VERYSLOW)
+cmd.dst_codec_video = Hevc(lossless=True,
+                           preset=VcPreset.N2_SUPERFAST)
+cmd.dst_codec_video = Hevc(mbps=100,
+                           preset=VcPreset.N6_MEDIUM)
+```
+
 
 # Timelapse
 
