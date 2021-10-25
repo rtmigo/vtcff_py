@@ -28,9 +28,6 @@ $ pip3 install git+https://github.com/rtmigo/vtcff_py@staging#egg=vtcff
 
 </details>
 
-
-
-
 # Basic example
 
 ```python3
@@ -126,15 +123,20 @@ from vtcff import FfmpegCommand, Scale
 cmd = FfmpegCommand()
 
 assert cmd.use_zscale  # by default, it's zscale (zimg) 
-cmd.use_zscale = False # switching to libswscale
+cmd.use_zscale = False  # switching to libswscale
 
 # properties affected:
 cmd.scale = Scale(1920, 1080)
 cmd.src_color_space = 'bt709'
 cmd.dst_color_space = 'bt709'
-cmd.src_range_full = False  
+cmd.src_range_full = False
 cmd.dst_range_full = False
 ```
+
+It is worth clarifying that even with `use_zscale=True`, the use of the usage 
+of zimg library is guaranteed only for *explicit* conversions specified by the properties
+of the `FfmpegCommand` object. If the input/output formats or filter combination
+would require implicit color conversions, ffmpeg may use libswscale to do this.
 
 # Crop and scale
 
@@ -210,7 +212,7 @@ By default, the `near_lossless` is set to slowest possible
 `VcPreset.N10_PLACEBO`, because we are trying to maximize quality.
 
 By default, the `lossless` is set to fastest possible
-`VcPreset.N1_ULTRAFAST`, because we are not losing any quality here. The 
+`VcPreset.N1_ULTRAFAST`, because we are not losing any quality here. The
 resulting size will be roughly comparable to ProRes HQ/XQ and the encoding time
 is reasonable.
 
@@ -227,7 +229,6 @@ cmd.dst_codec_video = Prores()
 # encode to ProRes 4:2:2 HQ instead 
 cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
 ```
-
 
 # Images to videos
 
