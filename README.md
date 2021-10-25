@@ -122,7 +122,7 @@ from vtcff import FfmpegCommand, Scale
 
 cmd = FfmpegCommand()
 
-assert cmd.use_zscale  # by default, it's 'zscale' (zimg) 
+assert cmd.use_zscale == True  # by default, it's 'zscale' (zimg) 
 cmd.use_zscale = False  # switching to 'scale' (libswscale)
 
 # properties affected:
