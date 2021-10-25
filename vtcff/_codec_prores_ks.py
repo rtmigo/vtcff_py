@@ -37,7 +37,7 @@ class Prores(Codec):
         self.qscale: Optional[int] = qscale
         self.spoof_vendor: bool = spoof_vendor
 
-    def __iter__(self) -> Iterable[Tuple[str, str]]:
+    def args(self) -> Iterable[Tuple[str, str]]:
         yield '-vcodec', 'prores_ks'
         if self.spoof_vendor:
             yield '-vendor', 'apl0'

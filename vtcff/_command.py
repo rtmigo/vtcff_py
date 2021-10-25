@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: MIT
 
 import os.path
+import warnings
 from pathlib import Path
-from typing import Optional, List, Iterable, Dict, Union
+from typing import Optional, List, Iterable, Dict, Union, NamedTuple, Tuple
 
 import framefile
 
@@ -36,6 +37,12 @@ def arg_i(path_or_pattern: Union[str, Path]) -> List[str]:
 
 
 class FfmpegCommand:
+    class CustomArgs(NamedTuple):
+        before_i: ArgsSubset = ArgsSubset()
+        after_i: ArgsSubset = ArgsSubset()
+        video: ArgsSubset = ArgsSubset()
+        audio: ArgsSubset = ArgsSubset()
+
     def __init__(self, use_zscale: bool = True):
 
         self._use_zscale = use_zscale
@@ -68,14 +75,25 @@ class FfmpegCommand:
 
         self.dst_time_range = BeginEndDuration()
 
-        # объект FfmpegCommand умеет генерировать понятные ему параметры.
-        # Но если хочется задать этакую экзотическую команду, например,
-        # найденную в интернете, это можно сделать, поместив ее в следующие
-        # поля. Команда будет распознана как пары '-key value'. Эти значения
-        # считаются более приортетными, чем сгенерированные объектом
-        self.override_general: ArgsSubset = ArgsSubset()
-        self.override_audio: ArgsSubset = ArgsSubset()
-        self.override_video: ArgsSubset = ArgsSubset()
+        # the FfmpegCommand object can generate parameters it understands.
+        # But if you want to add some exotic args, this can be done by placing
+        # then in fields of the following object
+        self.custom = FfmpegCommand.CustomArgs()
+
+    @property
+    def override_general(self) -> ArgsSubset:
+        warnings.warn("Use .custom.after_i", DeprecationWarning)  # 2021-10
+        return self.custom.after_i
+
+    @property
+    def override_audio(self) -> ArgsSubset:
+        warnings.warn("Use .custom.audio", DeprecationWarning)  # 2021-10
+        return self.custom.audio
+
+    @property
+    def override_video(self) -> ArgsSubset:
+        warnings.warn("Use .custom.video", DeprecationWarning)  # 2021-10
+        return self.custom.video
 
     def _find_or_create_filter(self, obj_type):
         vf = self._find_filter(obj_type)
@@ -233,7 +251,7 @@ class FfmpegCommand:
     def src_range_full(self, x: Optional[bool]):
         self._curr_scale_filter().src_range_full = x
 
-    def _iter_known(self):
+    def _iter_known_before_i(self) -> Iterable[Union[str, Tuple[str, str]]]:
         yield "ffmpeg"
 
         # для файлов EXR стоит указывать что-то вроде '-gamma 2.2', причем
@@ -274,22 +292,18 @@ class FfmpegCommand:
             # (https://stackoverflow.com/a/51224132)
             yield '-r', str(self.src_fps)
 
-        if self.src_file:  # todo это не должно быть опциональным
-            for arg in arg_i(self.src_file):
-                yield arg
-
+    def _iter_known_all_after_i(self) -> Iterable[Union[str, Tuple[str, str]]]:
         if self.dst_time_range.begin:
             yield "-ss", str(self.dst_time_range.begin)
         if self.dst_time_range.duration is not None:
             yield "-t", str(self.dst_time_range.duration)
-
         if self._filter_chain:
             vf_str = ','.join(str(f) for f in self._filter_chain)
             if vf_str:
                 yield '-vf', vf_str
 
         if self.dst_codec_video is not None:
-            for pair in iter(self.dst_codec_video):
+            for pair in self.dst_codec_video.args():
                 yield pair
 
         # странные параметры, которые определяют "метаданные" результирующего
@@ -316,25 +330,43 @@ class FfmpegCommand:
         # Но здесь мы его не возвращаем - метод __iter__ добавит перед именем
         # файла еще что-то - и потом сам допишет имя
 
-    def _overrides_to_dict(self) -> Dict[str, Optional[str]]:
+    # def _iter_known(self):
+
+    def _combine_overrides(self, src: Iterable[Dict[str, Optional[str]]]) \
+            -> Dict[str, Optional[str]]:
         overrides: Dict[str, Optional[str]] = dict()
-        for ov in [self.override_general,
-                   self.override_video,
-                   self.override_audio]:
-            for k, v in ov.pairs():
+        for ov in src:
+            for k, v in ov.items():
                 # todo test overriding overrides
                 if k in overrides:
                     print(f"Overriding [{k} {overrides[k]}] with [{k}, {v}]")
                 overrides[k] = v
         return overrides
 
-    def __iter__(self) -> Iterable[str]:
-        """Возвращает аргументы к команде ffmpeg списком."""
-        overrides = self._overrides_to_dict()
+    # def _overrides_to_dict(self) -> Dict[str, Optional[str]]:
+    #     overrides: Dict[str, Optional[str]] = dict()
+    #     for ov in [self.override_general,
+    #                self.override_video,
+    #                self.override_audio]:
+    #         for k, v in ov.pairs():
+    #             # todo test overriding overrides
+    #             if k in overrides:
+    #                 print(f"Overriding [{k} {overrides[k]}] with [{k}, {v}]")
+    #             overrides[k] = v
+    #     return overrides
+
+    def _iter_replacing_overrides(
+            self,
+            args_or_pairs: Iterable[Union[str, Tuple[str, str]]],
+            overrides: Dict[str, Optional[str]]) \
+            -> Iterable[str]:
 
         returned_keys = set()
 
-        for item in self._iter_known():
+        k: str
+        v: Optional[str]
+
+        for item in args_or_pairs:
             if isinstance(item, str):
                 yield item
             elif isinstance(item, tuple):
@@ -362,6 +394,65 @@ class FfmpegCommand:
                 yield k
                 if v is not None:
                     yield v
+
+    def __iter__(self) -> Iterable[str]:
+        """Возвращает аргументы к команде ffmpeg списком."""
+
+        for x in self._iter_replacing_overrides(
+                self._iter_known_before_i(),
+                dict(self.custom.before_i.pairs())):
+            yield x
+
+        if self.src_file:  # todo это не должно быть опциональным
+            for arg in arg_i(self.src_file):
+                yield arg
+
+        combined_overrides_after_i = self._combine_overrides([
+            dict(self.custom.after_i.pairs()),
+            dict(self.custom.video.pairs()),
+            dict(self.custom.audio.pairs()),
+        ])
+
+        for x in self._iter_replacing_overrides(
+                self._iter_known_all_after_i(),
+                combined_overrides_after_i):
+            yield x
+
+        # overrides = self._overrides_to_dict()
+        #
+        # for x in  self._iter_replacing_overrides(self._iter_known(), overrides):
+        #     yield x
+
+        # returned_keys = set()
+        #
+        # for item in self._iter_known():
+        #     if isinstance(item, str):
+        #         yield item
+        #     elif isinstance(item, tuple):
+        #         k, v = item
+        #         if k in overrides:
+        #             other_v = overrides[k]
+        #             print(f"Overriding [{k} {v}] with [{k}, {other_v}]")
+        #             yield k
+        #             if other_v is not None:
+        #                 yield other_v
+        #         else:
+        #             yield k
+        #             yield v
+        #         returned_keys.add(k)
+        #     else:
+        #         raise TypeError
+        #
+        # # до сих пор мы генерировали последовательность известных объекту
+        # # аргументов в привычном нам порядке. Некоторые аргументы могли быть
+        # # подменены на значения из словаря overrides. Но возможно в словаре
+        # # overrides есть и другие аргументы, до сих пор не упомянутые.
+        # # Возвращаем теперь их
+        # for k, v in overrides.items():
+        #     if k not in returned_keys:
+        #         yield k
+        #         if v is not None:
+        #             yield v
 
         # последним в списке аргументов идет имя целевого файла
         if self.dst_file is None:
