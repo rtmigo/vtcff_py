@@ -9,7 +9,7 @@ desirable.
 
 `vtcff` tends to maximize quality, sacrificing speed and disk space.
 
-`vtcff` is actaully a wrapper for `ffmpeg` – the least intuitive video tool ever
+`vtcff` is actually a wrapper for `ffmpeg` – the least intuitive video tool ever
 created.
 
 # Install
