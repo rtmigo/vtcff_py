@@ -230,8 +230,8 @@ cmd.dst_codec_video = Hevc(mbps=100,
 ```
 
 By default, the `near_lossless` is set to slowest possible
-`VcPreset.N10_PLACEBO`, because we are trying to maximize quality. You will
-probably want to choose a faster preset so that the result appears within a
+`VcPreset.N10_PLACEBO`, because we are trying to maximize quality. You may
+want to choose a faster preset so that the result appears within a
 lifetime.
 
 By default, the `lossless` is set to fastest possible
