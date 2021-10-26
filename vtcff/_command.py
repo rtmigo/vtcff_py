@@ -385,11 +385,6 @@ class FfmpegCommand:
         # Но здесь мы его не возвращаем - метод __iter__ добавит перед именем
         # файла еще что-то - и потом сам допишет имя
 
-    def _log_file_name(self) -> str:
-        # todo test
-        return self.dst_file + ".log"
-        # if framefile.is_pattern(self.dst_file,)
-
     def _combine_overrides(self, src: Iterable[Dict[str, Optional[str]]]) \
             -> Dict[str, Optional[str]]:
         overrides: Dict[str, Optional[str]] = dict()
