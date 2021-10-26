@@ -3,9 +3,13 @@
 **🚧 This project is a draft and is not intended to be used by anyone.**
 
 `vtcff` is a library for transcoding between video formats with an emphasis on
-maintaining quality and color depth in video production pipelines.
+maintaining quality and color depth in video production pipelines. In studio
+tasks, video seconds take up gigabytes and quality compromises are least
+desirable. 
 
-It generates arguments for `ffmpeg` – the least intuitive video tool ever
+`vtcff` tends to maximize quality, sacrificing speed and disk space.
+
+`vtcff` is actually a wrapper for `ffmpeg` – the least intuitive video tool ever
 created.
 
 # Install
@@ -115,28 +119,31 @@ Arguments to be inserted after `-i source`:
 By default, `vtcff` uses `zscale`. Sometimes it may lead to error "no path
 between colorspaces". This error would not occur with `scale`.
 
-The `use_zscale` property which to use.
+The `use_zscale` property determines which filter to use.
 
 ```python3
 from vtcff import FfmpegCommand, Scale
 
 cmd = FfmpegCommand()
 
-assert cmd.use_zscale  # by default, it's zscale (zimg) 
-cmd.use_zscale = False  # switching to libswscale
+assert cmd.use_zscale == True  # by default, it's 'zscale' (zimg) 
+cmd.use_zscale = False  # switching to 'scale' (libswscale)
 
 # properties affected:
 cmd.scale = Scale(1920, 1080)
 cmd.src_color_space = 'bt709'
-cmd.dst_color_space = 'bt709'
-cmd.src_range_full = False
+cmd.dst_color_space = 'bt2020'
+cmd.src_range_full = True
 cmd.dst_range_full = False
 ```
 
-It is worth clarifying that even with `use_zscale=True`, the use of the usage 
-of zimg library is guaranteed only for *explicit* conversions specified by the properties
-of the `FfmpegCommand` object. If the input/output formats or filter combination
-would require implicit color conversions, ffmpeg may use libswscale to do this.
+`use_zscale=True`, means that zimg will be used for conversions
+**explicitly** set by object properties. This is good because these conversions
+will be of high quality.
+
+However, **implicit** conversions may also be required. For example, before
+processing 16-bit PNG with `zscale`, we need to convert the pixel format from
+`rgba64be` to `gbrap16le` 🤪. Ffmpeg will do it automatically with `libswscale`.
 
 # Crop and scale
 
@@ -187,6 +194,20 @@ cmd.dst_color_space = 'bt2020'
 
 # Target formats
 
+## Encoding to Apple ProRes
+
+```python3
+from vtcff import FfmpegCommand, Prores, ProresProfile
+
+cmd = FfmpegCommand()
+
+# by default it will encode to ProRes 4:2:2
+cmd.dst_codec_video = Prores()
+
+# encode to ProRes 4:2:2 HQ instead 
+cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
+```
+
 ## Encoding to  HEVC (H.265)
 
 ```python3
@@ -209,26 +230,14 @@ cmd.dst_codec_video = Hevc(mbps=100,
 ```
 
 By default, the `near_lossless` is set to slowest possible
-`VcPreset.N10_PLACEBO`, because we are trying to maximize quality.
+`VcPreset.N10_PLACEBO`, because we are trying to maximize quality. You may
+want to choose a faster preset so that the result appears within a
+lifetime.
 
 By default, the `lossless` is set to fastest possible
 `VcPreset.N1_ULTRAFAST`, because we are not losing any quality here. The
 resulting size will be roughly comparable to ProRes HQ/XQ and the encoding time
 is reasonable.
-
-## Encoding to Apple ProRes
-
-```python3
-from vtcff import FfmpegCommand, Prores, ProresProfile
-
-cmd = FfmpegCommand()
-
-# by default it will encode to ProRes 4:2:2
-cmd.dst_codec_video = Prores()
-
-# encode to ProRes 4:2:2 HQ instead 
-cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
-```
 
 # Images to videos
 
