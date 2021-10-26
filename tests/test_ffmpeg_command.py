@@ -202,6 +202,20 @@ class TestsZscale(BaseTest):
 
         self.assertAllIn(expected, str(cmd))
 
+    # def test_zscale_no_auto_conversion_filters(self):
+    #     cmd = create_test_cmd()
+    #
+    #     # when zscale is on auto_conversions are disabled
+    #     cmd.use_zscale = True
+    #     self.assertNotIn('-auto_conversion_filters', list(cmd))
+    #     self.assertIn('-noauto_conversion_filters', list(cmd))
+    #
+    #     # when zscale is off auto_conversions are enabled
+    #     cmd.use_zscale = False
+    #     self.assertNotIn('-auto_conversion_filters', list(cmd))
+    #     self.assertNotIn('-noauto_conversion_filters', list(cmd))
+
+
 
 class TestCommand(BaseTest):
 
@@ -216,6 +230,8 @@ class TestCommand(BaseTest):
     def test_dst_file_is_last_arg(self):
         cmd = create_test_cmd()
         self.assertEqual(cmd.dst_file, list(cmd)[-1])
+
+
 
     def test_framerate_before_i(self):
         cmd = create_test_cmd()
