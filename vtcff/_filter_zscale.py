@@ -98,10 +98,29 @@ class ZscaleFilter(FilterBase):
 
 
 class ColorSpaces:
+    # http://underpop.online.fr/f/ffmpeg/help/zscale.htm.gz
     _data = [
+        # left ffmpeg, right zscale
+
         ('bt709', '709'),
-        ('bt601', '601'),
-        ('bt2020', '2020'),
+
+        # ffmpeg smpte170m is BT.470BG or BT.601-6 625
+        # (http://underpop.online.fr/f/ffmpeg/help/colorspace.htm.gz)
+        ('bt470bg', '470bg'),
+
+        # ffmpeg smpte170m is SMPTE-170M or BT.601-6 525
+        # (http://underpop.online.fr/f/ffmpeg/help/colorspace.htm.gz)
+        ('smpte170m', '170m'),
+
+        # ffmpeg bt2020ncl is BT.2020 with non-constant luminance
+        # (http://underpop.online.fr/f/ffmpeg/help/colorspace.htm.gz)
+        ('bt2020ncl', '2020_ncl'),
+
+        # todo test ('bt2020' is 8 bit only?)
+        # bt2020 - BT.2020
+        # bt2020-10 - BT.2020 for 10-bits content
+        # bt2020-12 - BT.2020 for 12-bits content
+        ('bt2020', '2020_cl'),
         (None, None)
     ]
 
