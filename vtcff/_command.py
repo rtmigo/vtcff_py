@@ -4,7 +4,7 @@
 import os.path
 import warnings
 from pathlib import Path
-from typing import Optional, List, Iterable, Dict, Union, NamedTuple, Tuple
+from typing import Optional, List, Iterable, Dict, Union, Tuple
 
 import framefile
 
@@ -55,12 +55,31 @@ def desynonimize(arg: str) -> str:
     return arg
 
 
+class CustomArgs:
+    def __init__(self):
+        self._before_i: ArgsSubset = ArgsSubset()
+        self._after_i: ArgsSubset = ArgsSubset()
+        self._video: ArgsSubset = ArgsSubset()
+        self._audio: ArgsSubset = ArgsSubset()
+
+    @property
+    def before_i(self) -> ArgsSubset:
+        return self._before_i
+
+    @property
+    def after_i(self) -> ArgsSubset:
+        return self._after_i
+
+    @property
+    def video(self) -> ArgsSubset:
+        return self._video
+
+    @property
+    def audio(self) -> ArgsSubset:
+        return self._audio
+
+
 class FfmpegCommand:
-    class CustomArgs(NamedTuple):
-        before_i: ArgsSubset = ArgsSubset()
-        after_i: ArgsSubset = ArgsSubset()
-        video: ArgsSubset = ArgsSubset()
-        audio: ArgsSubset = ArgsSubset()
 
     def __init__(self, use_zscale: bool = True):
 
@@ -112,7 +131,7 @@ class FfmpegCommand:
         # the FfmpegCommand object can generate parameters it understands.
         # But if you want to add some exotic args, this can be done by placing
         # then in fields of the following object
-        self.custom = FfmpegCommand.CustomArgs()
+        self.custom = CustomArgs()
 
         self.debug = False
 
