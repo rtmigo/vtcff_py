@@ -104,7 +104,7 @@ class ColorSpaces:
 
         ('bt709', '709'),
 
-        # ffmpeg smpte170m is BT.470BG or BT.601-6 625
+        # ffmpeg bt470bg is BT.470BG or BT.601-6 625
         # (http://underpop.online.fr/f/ffmpeg/help/colorspace.htm.gz)
         ('bt470bg', '470bg'),
 
