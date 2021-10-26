@@ -243,7 +243,7 @@ is reasonable.
 
 The media streams can be copied without re-encoding and without quality loss.
 
-However, there may be some loss of metadata - for example, information 
+However, there may be some loss of metadata – for example, information 
 about color ranges and color spaces.
 
 ```python3
@@ -252,7 +252,7 @@ from vtcff import FfmpegCommand, VideoCopy, NoAudio
 cmd = FfmpegCommand()
 
 # changing container from mp4 to mov
-cmd.src_file = "source.mkv"
+cmd.src_file = "source.mp4"
 cmd.dst_file = "source.mov"
 
 # keeping video, removing audio
