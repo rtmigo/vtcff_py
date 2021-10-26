@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
 
-from codecs import Codec
 from typing import Optional, Iterable, Tuple
 
+from ._codec import VideoCodec
 from ._codec_avc_preset import VcPreset
 from ._common import colon_splitted_pairs
 
@@ -20,7 +20,7 @@ class HevcLosslessAndNearLosslessError(Exception):
     pass
 
 
-class Hevc(Codec):
+class Hevc(VideoCodec):
     def __init__(self,
                  preset: VcPreset = None,
                  lossless: bool = False,
@@ -37,7 +37,7 @@ class Hevc(Codec):
         if self.lossless and self.near_lossless:
             raise HevcLosslessAndNearLosslessError
 
-        yield "-vcodec", "libx265"
+        yield "-codec:v", "libx265"
 
         params = dict()
 

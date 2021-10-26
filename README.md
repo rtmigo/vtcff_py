@@ -66,10 +66,10 @@ cmd.dst_file = 'target.mov'
 cmd.dst_codec_video = Prores()
 
 print(str(cmd))
-# ffmpeg -i source.mov -vcodec prores_ks target.mov
+# ffmpeg -i source.mov -codec:v prores_ks target.mov
 
 print(list(cmd))
-# ['ffmpeg', '-i', 'source.mov', '-vcodec', 'prores_ks', 'target.mov']
+# ['ffmpeg', '-i', 'source.mov', '-codec:v', 'prores_ks', 'target.mov']
 
 # running in different ways:
 os.system(str(cmd))
@@ -87,11 +87,11 @@ from vtcff import FfmpegCommand
 cmd = FfmpegCommand()
 
 # set arguments as string
-cmd.custom.video.string = "-vcodec libx265"
+cmd.custom.video.string = "-codec:v libx265"
 cmd.custom.video.string += "-x265-params lossless=1"
 
 # or as list
-cmd.custom.video.list = ["-vcodec", "libx265"]
+cmd.custom.video.list = ["-codec:v", "libx265"]
 cmd.custom.video.list.extend(["-x265-params", "lossless=1"])
 ```
 

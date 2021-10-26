@@ -10,6 +10,8 @@ import framefile
 
 from vtcff._args_subset import ArgsSubset
 from vtcff._codec import Codec
+from vtcff._codec_audio_copy import AudioCopy
+from vtcff._codec_video_copy import VideoCopy
 from vtcff._common import Scale
 from vtcff._filter_crop import Crop
 from vtcff._filter_pad import Pad
@@ -17,6 +19,14 @@ from vtcff._filter_swscale import SwscaleFilter
 from vtcff._filter_transpose import Transpose, TransposeFilter
 from vtcff._filter_zscale import ZscaleFilter, ColorSpaces
 from vtcff._time_span import BeginEndDuration
+
+
+class VideoCodecNotSpecifiedError(Exception):
+    pass
+
+
+class AudioCodecNotSpecifiedError(Exception):
+    pass
 
 
 def arg_i(path_or_pattern: Union[str, Path]) -> List[str]:
@@ -34,6 +44,15 @@ def arg_i(path_or_pattern: Union[str, Path]) -> List[str]:
                 Path(path_or_pattern))
         assert isinstance(path_or_pattern, str)
         return ["-i", path_or_pattern]
+
+
+def desynonimize(arg: str) -> str:
+    # https://superuser.com/q/835048
+    if arg in ('-vcodec', '-c:v'):
+        return '-codec:v'
+    if arg in ('-acodec', '-c:a'):
+        return '-codec:a'
+    return arg
 
 
 class FfmpegCommand:
@@ -71,8 +90,15 @@ class FfmpegCommand:
         self._dst_color_trc_meta: Optional[str] = None
         self._dst_colorspace_meta: Optional[str] = None
 
-        self.dst_codec_video: Optional[Codec] = None
-        self.dst_codec_audio: Optional[Codec] = None
+        # for vtcff we require video and audio codecs to be explicitly
+        # specified (although for ffmpeg the are optional). But the actual
+        # following filed can be set to None. Because user may want
+        # to specify codecs with .custom.video, for example.
+        # We will check the codecs are set at the very last stage: when
+        # we get all out arguments as strings.
+        self.dst_codec_video: Optional[Codec] = VideoCopy()
+        self.dst_codec_audio: Optional[Codec] = AudioCopy()
+
         self.dst_pixfmt: Optional[str] = None
 
         # про -color_range
@@ -342,7 +368,8 @@ class FfmpegCommand:
             # (https://stackoverflow.com/a/51224132)
             yield '-r', str(self.src_fps)
 
-    def _iter_known_all_after_i(self) -> Iterable[Union[str, Tuple[str, Optional[str]]]]:
+    def _iter_known_all_after_i(self) -> Iterable[
+        Union[str, Tuple[str, Optional[str]]]]:
         if self.dst_time_range.begin:
             yield "-ss", str(self.dst_time_range.begin)
         if self.dst_time_range.duration is not None:
@@ -383,7 +410,6 @@ class FfmpegCommand:
             for pair in self.dst_codec_audio.args():
                 yield pair
 
-
         if self.debug:
             yield '-loglevel', 'verbose'
 
@@ -404,7 +430,7 @@ class FfmpegCommand:
 
     def _iter_replacing_overrides(
             self,
-            args_or_pairs: Iterable[Union[str, Tuple[str, str]]],
+            args_or_pairs: Iterable[Union[str, Tuple[str, Optional[str]]]],
             overrides: Dict[str, Optional[str]]) \
             -> Iterable[str]:
 
@@ -443,7 +469,7 @@ class FfmpegCommand:
                 if v is not None:
                     yield v
 
-    def __iter__(self) -> Iterable[str]:
+    def _iter_almost_final(self) -> Iterable[str]:
         """Возвращает аргументы к команде ffmpeg списком."""
 
         for x in self._iter_replacing_overrides(
@@ -470,6 +496,18 @@ class FfmpegCommand:
         if self.dst_file is None:
             raise ValueError("Output file not specified")
         yield str(self.dst_file)
+
+    def __iter__(self) -> Iterable[str]:
+        args = list(desynonimize(arg) for arg in self._iter_almost_final())
+
+        if not any(s in args for s in ("-codec:v", "-vn")):
+            raise VideoCodecNotSpecifiedError(args)
+
+        # The -vn / -an / -sn / -dn options can be used to skip inclusion
+        # of video, audio, subtitle and data streams respectively
+        if not any(s in args for s in ("-codec:a", "-an")):
+            raise AudioCodecNotSpecifiedError
+        return iter(args)
 
     def __str__(self):
         return ' '.join(iter(self))

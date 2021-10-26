@@ -3,7 +3,7 @@
 
 from typing import Iterable
 
-from vtcff import FfmpegCommand
+from vtcff import FfmpegCommand, AudioCopy, VideoCopy
 
 
 def find_item_after(items: Iterable, findme):
@@ -36,6 +36,9 @@ def create_test_cmd(zscale=None) -> FfmpegCommand:
         cmd = FfmpegCommand()
     cmd.src_file = "/tmp/path/to/src.mov"
     cmd.dst_file = "/tmp/path/to/dst.mov"
+    # if codecs:
+    #     cmd.dst_codec_video = VideoCopy()
+    #     cmd.dst_codec_audio = AudioCopy()
     return cmd
 
 
