@@ -42,6 +42,8 @@ class Prores(Codec):
         if self.spoof_vendor:
             yield '-vendor', 'apl0'
         if self.qscale is not None:
+            if self.qscale is not None and not 0 <= self.qscale <= 64:
+                raise ValueError(self.qscale)
             yield '-q:v', str(self.qscale)
         if self.profile is not None:
             yield '-profile:v', str(self.profile.value)
