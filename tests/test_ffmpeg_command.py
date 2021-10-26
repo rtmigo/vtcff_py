@@ -279,7 +279,7 @@ class TestCommand(BaseTest):
             with self.subTest(astring):
                 cmd = create_test_cmd()
                 cmd.dst_codec_audio = None
-                cmd.custom.video.string = astring
+                cmd.custom.audio.string = astring
                 list(cmd)  # no exceptions
 
     def test_dst_range_limited(self):
