@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
+
 import random
 import unittest
 from pathlib import Path
@@ -219,6 +220,12 @@ class TestsZscale(BaseTest):
 
         self.assertAllIn(expected, str(cmd))
 
+    def test_warning(self):
+        with self.assertWarns(UserWarning):
+            cmd = create_test_cmd()
+            cmd.dst_color_space = 'bt2020'
+            list(cmd)
+
 
 class TestCommand(BaseTest):
 
@@ -339,13 +346,13 @@ class TestCommand(BaseTest):
         cmd.dst_color_space = 'bt709'
         self.assertIn('-colorspace bt709', str(cmd))
 
-        cmd.custom.video.list.extend(['-colorspace', 'bt2020'])
+        cmd.custom.video.list.extend(['-colorspace', 'bt2020ncl'])
         self.assertNotIn('-colorspace bt709', str(cmd))
-        self.assertIn('-colorspace bt2020', str(cmd))
+        self.assertIn('-colorspace bt2020ncl', str(cmd))
 
         cmd.custom.video.string = '-colorspace bt601'
         self.assertNotIn('-colorspace bt709', str(cmd))
-        self.assertNotIn('-colorspace bt2020', str(cmd))
+        self.assertNotIn('-colorspace bt2020ncl', str(cmd))
         self.assertIn('-colorspace bt601', str(cmd))
 
     def test_override_unset_param(self):
@@ -487,8 +494,8 @@ class TestCommand(BaseTest):
                           downscale_only=random_bool())
             src_range_full = random_bool()
             dst_range_full = random_bool()
-            src_color = random.choice(('bt709', 'bt2020'))
-            dst_color = random.choice(('bt709', 'bt2020'))
+            src_color = random.choice(('bt709', 'bt2020ncl'))
+            dst_color = random.choice(('bt709', 'bt2020ncl'))
 
             cmd.scale = scale
             cmd.src_range_full = src_range_full

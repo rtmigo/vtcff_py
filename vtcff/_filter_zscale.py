@@ -1,6 +1,6 @@
 # SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
-
+import warnings
 from typing import Optional
 
 from vtcff._common import Scale, frame_dimension_spec
@@ -120,20 +120,39 @@ class ColorSpaces:
         # bt2020 - BT.2020
         # bt2020-10 - BT.2020 for 10-bits content
         # bt2020-12 - BT.2020 for 12-bits content
-        ('bt2020', '2020_cl'),
+        ('bt2020', '2020_cl', True),
         (None, None)
     ]
 
     @classmethod
+    def _find_by_ffmpeg(cls, x):
+        return next(t for t in cls._data if t[0] == x)
+
+    @classmethod
+    def _find_by_zscale(cls, x):
+        return next(t for t in cls._data if t[1] == x)
+
+    @classmethod
+    def _warn_on_need(cls, t):
+        if len(t) >= 3 and t[2]:
+            warnings.warn(f"colorspaces {t} not tested", stacklevel=3)
+
+    @classmethod
     def ffmpeg_to_zscale(cls, cs):
         try:
-            return next(z for (f, z) in cls._data if f == cs)
+            tuple = cls._find_by_ffmpeg(cs)
+            cls._warn_on_need(tuple)
+            return tuple[1]
         except StopIteration:
             raise ValueError(cs)
 
     @classmethod
     def zscale_to_ffmpeg(cls, cs):
         try:
-            return next(f for (f, z) in cls._data if z == cs)
+            tuple = cls._find_by_zscale(cs)
+            cls._warn_on_need(tuple)
+            return tuple[0]
+
+
         except StopIteration:
             raise ValueError(cs)
