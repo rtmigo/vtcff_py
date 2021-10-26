@@ -47,20 +47,26 @@ class FfmpegCommand:
 
         self._use_zscale = use_zscale
 
+        self.ffmpeg_exe: Union[Path, str] = "ffmpeg"  # todo test
+        """The ffmpeg executable file, the first argument of 
+        the generated command."""
+
         self.src_file: Optional[Union[Path, str]] = None
         self.src_gamma: Optional[float] = None
         self.src_fps: Optional[float] = None
 
         self.dst_file: Optional[Union[Path, str]] = None
 
-        # следующие поля будут влиять на параметры, которые имеют довольно
-        # туманное значение. Например, при кодировании они позволят увидеть
+        # the following fields will affect the parameters that have quite
+        # vague meaning. For example, when encoding, they will show
         #   yuv422p10le(tv, bt709, progressive)
-        # вместо
+        # instead
         #   yuv422p10le(tv, bt709/unknown/unknown, progressive)
-        # Мнения в интернете сходятся к тому, что это "просто мета-данные",
-        # и к конвертированию они никогда не ведут. Впрочем, и как мета-данные
-        # они не обязательно куда-то записываются.
+        # Opinions on the web agree that this is "just meta-data",
+        # and they never lead to conversion. However, and as metadata
+        # they don't necessarily written anywhere as well. We will
+        # pass them to ffmpeg in the hope that sometimes it will serve
+        # the cause of good.
         self._dst_color_primaries_meta: Optional[str] = None
         self._dst_color_trc_meta: Optional[str] = None
         self._dst_colorspace_meta: Optional[str] = None
@@ -295,7 +301,7 @@ class FfmpegCommand:
         self._curr_scale_filter().src_range_full = x
 
     def _iter_known_before_i(self) -> Iterable[Union[str, Tuple[str, str]]]:
-        yield "ffmpeg"
+        yield str(self.ffmpeg_exe)
 
         # для файлов EXR стоит указывать что-то вроде '-gamma 2.2', причем
         # еще до аргумента -i
@@ -395,18 +401,6 @@ class FfmpegCommand:
                 overrides[k] = v
         return overrides
 
-    # def _overrides_to_dict(self) -> Dict[str, Optional[str]]:
-    #     overrides: Dict[str, Optional[str]] = dict()
-    #     for ov in [self.override_general,
-    #                self.override_video,
-    #                self.override_audio]:
-    #         for k, v in ov.pairs():
-    #             # todo test overriding overrides
-    #             if k in overrides:
-    #                 print(f"Overriding [{k} {overrides[k]}] with [{k}, {v}]")
-    #             overrides[k] = v
-    #     return overrides
-
     def _iter_replacing_overrides(
             self,
             args_or_pairs: Iterable[Union[str, Tuple[str, str]]],
@@ -469,42 +463,6 @@ class FfmpegCommand:
                 self._iter_known_all_after_i(),
                 combined_overrides_after_i):
             yield x
-
-        # overrides = self._overrides_to_dict()
-        #
-        # for x in  self._iter_replacing_overrides(self._iter_known(), overrides):
-        #     yield x
-
-        # returned_keys = set()
-        #
-        # for item in self._iter_known():
-        #     if isinstance(item, str):
-        #         yield item
-        #     elif isinstance(item, tuple):
-        #         k, v = item
-        #         if k in overrides:
-        #             other_v = overrides[k]
-        #             print(f"Overriding [{k} {v}] with [{k}, {other_v}]")
-        #             yield k
-        #             if other_v is not None:
-        #                 yield other_v
-        #         else:
-        #             yield k
-        #             yield v
-        #         returned_keys.add(k)
-        #     else:
-        #         raise TypeError
-        #
-        # # до сих пор мы генерировали последовательность известных объекту
-        # # аргументов в привычном нам порядке. Некоторые аргументы могли быть
-        # # подменены на значения из словаря overrides. Но возможно в словаре
-        # # overrides есть и другие аргументы, до сих пор не упомянутые.
-        # # Возвращаем теперь их
-        # for k, v in overrides.items():
-        #     if k not in returned_keys:
-        #         yield k
-        #         if v is not None:
-        #             yield v
 
         # последним в списке аргументов идет имя целевого файла
         if self.dst_file is None:
