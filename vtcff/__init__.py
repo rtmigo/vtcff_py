@@ -15,3 +15,4 @@ from ._math_cropping import crop_and_scale
 from ._math_padding import _letterbox
 from ._codec_video_copy import VideoCopy
 from ._codec_audio_copy import AudioCopy
+from ._codec_audio_none import NoAudio

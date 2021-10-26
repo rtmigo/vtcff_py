@@ -239,6 +239,27 @@ By default, the `lossless` is set to fastest possible
 resulting size will be roughly comparable to ProRes HQ/XQ and the encoding time
 is reasonable.
 
+## Copying streams
+
+The media streams can be copied without re-encoding and without quality loss.
+
+However, there may be some loss of metadata - for example, information 
+about color ranges and color spaces.
+
+```python3
+from vtcff import FfmpegCommand, VideoCopy, NoAudio
+
+cmd = FfmpegCommand()
+
+# changing container from mp4 to mov
+cmd.src_file = "source.mkv"
+cmd.dst_file = "source.mov"
+
+# keeping video, removing audio
+cmd.dst_codec_video = VideoCopy()
+cmd.dst_codec_audio = NoAudio()
+```
+
 # Images to videos
 
 Converting timelapses or CGI frame sequences to ProRes video file.

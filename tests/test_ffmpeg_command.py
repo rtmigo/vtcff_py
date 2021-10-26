@@ -10,6 +10,7 @@ from tests.common import create_test_cmd, unique_item_after
 from vtcff import Crop, FfmpegCommand, Hevc, VideoCopy, AudioCopy
 from vtcff import HevcLosslessAndNearLosslessError, \
     HevcBitrateSpecifiedForLosslessError
+from vtcff._codec_audio_none import NoAudio
 from vtcff._codec_avc_preset import VcPreset
 from vtcff._codec_prores_ks import Prores, ProresProfile
 from vtcff._common import Scale
@@ -147,6 +148,7 @@ class TestVideoCopy(BaseTest):
         cmd.dst_codec_video = VideoCopy()
         self.assertAllIn(items, str(cmd))
 
+
 class TestAudioCopy(BaseTest):
     def test_base(self):
         cmd = create_test_cmd()
@@ -154,6 +156,17 @@ class TestAudioCopy(BaseTest):
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_audio = AudioCopy()
         self.assertAllIn(items, str(cmd))
+
+
+class TestNoAudio(BaseTest):
+    def test_base(self):
+        cmd = create_test_cmd()
+        items = ['-an']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_audio = NoAudio()
+        self.assertAllIn(items, str(cmd))
+        self.assertNotIn("None", str(cmd))
+
 
 class TestsZscale(BaseTest):
 

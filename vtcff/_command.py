@@ -342,7 +342,7 @@ class FfmpegCommand:
             # (https://stackoverflow.com/a/51224132)
             yield '-r', str(self.src_fps)
 
-    def _iter_known_all_after_i(self) -> Iterable[Union[str, Tuple[str, str]]]:
+    def _iter_known_all_after_i(self) -> Iterable[Union[str, Tuple[str, Optional[str]]]]:
         if self.dst_time_range.begin:
             yield "-ss", str(self.dst_time_range.begin)
         if self.dst_time_range.duration is not None:
@@ -385,7 +385,7 @@ class FfmpegCommand:
 
 
         if self.debug:
-            yield '-loglevel', 'debug'
+            yield '-loglevel', 'verbose'
 
         # последним в списке аргументов должно идти имя целевого файла.
         # Но здесь мы его не возвращаем - метод __iter__ добавит перед именем
@@ -426,7 +426,8 @@ class FfmpegCommand:
                         yield other_v
                 else:
                     yield k
-                    yield v
+                    if v is not None:
+                        yield v
                 returned_keys.add(k)
             else:
                 raise TypeError
