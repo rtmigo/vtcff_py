@@ -72,6 +72,7 @@ class FfmpegCommand:
         self._dst_colorspace_meta: Optional[str] = None
 
         self.dst_codec_video: Optional[Codec] = None
+        self.dst_codec_audio: Optional[Codec] = None
         self.dst_pixfmt: Optional[str] = None
 
         # про -color_range
@@ -377,6 +378,11 @@ class FfmpegCommand:
         yield '-movflags', '+write_colr'
         yield ('-sws_flags',
                'spline+accurate_rnd+full_chroma_int+full_chroma_inp')
+
+        if self.dst_codec_audio is not None:
+            for pair in self.dst_codec_audio.args():
+                yield pair
+
 
         if self.debug:
             yield '-loglevel', 'debug'

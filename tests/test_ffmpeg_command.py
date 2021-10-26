@@ -7,7 +7,7 @@ from tempfile import TemporaryDirectory
 from typing import List
 
 from tests.common import create_test_cmd, unique_item_after
-from vtcff import Crop, FfmpegCommand, Hevc, Avc
+from vtcff import Crop, FfmpegCommand, Hevc, VideoCopy, AudioCopy
 from vtcff import HevcLosslessAndNearLosslessError, \
     HevcBitrateSpecifiedForLosslessError
 from vtcff._codec_avc_preset import VcPreset
@@ -139,21 +139,21 @@ class TestHevc(BaseTest):
             list(Hevc(lossless=True, mbps=100).args())
 
 
-class TestAvc(BaseTest):
+class TestVideoCopy(BaseTest):
     def test_base(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx264']
+        items = ['-vcodec copy']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Avc()
+        cmd.dst_codec_video = VideoCopy()
         self.assertAllIn(items, str(cmd))
 
-    def test_preset(self):
+class TestAudioCopy(BaseTest):
+    def test_base(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx264', '-preset fast']
+        items = ['-acodec copy']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Avc(preset=VcPreset.N5_FAST)
+        cmd.dst_codec_audio = AudioCopy()
         self.assertAllIn(items, str(cmd))
-
 
 class TestsZscale(BaseTest):
 
@@ -216,7 +216,6 @@ class TestsZscale(BaseTest):
     #     self.assertNotIn('-noauto_conversion_filters', list(cmd))
 
 
-
 class TestCommand(BaseTest):
 
     def test_ffmpeg_is_first_arg(self):
@@ -230,8 +229,6 @@ class TestCommand(BaseTest):
     def test_dst_file_is_last_arg(self):
         cmd = create_test_cmd()
         self.assertEqual(cmd.dst_file, list(cmd)[-1])
-
-
 
     def test_framerate_before_i(self):
         cmd = create_test_cmd()
