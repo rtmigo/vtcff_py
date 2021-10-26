@@ -253,11 +253,16 @@ class TestCommand(BaseTest):
             cmd.dst_codec_video = None
             with self.assertRaises(VideoCodecNotSpecifiedError):
                 list(cmd)
-        with self.subTest("as string"):
-            cmd = create_test_cmd()
-            cmd.dst_codec_video = None
-            cmd.custom.video.string = "-vcodec prores"
-            list(cmd)  # no exceptions
+        for vstring in [
+            "-vcodec prores",
+            "-codec:v prores",
+            "-c:v prores",
+            "-vn"]:
+            with self.subTest(vstring):
+                cmd = create_test_cmd()
+                cmd.dst_codec_video = None
+                cmd.custom.video.string = vstring
+                list(cmd)  # no exceptions
 
     def test_audio_codec_necessary(self):
         with self.subTest("None"):
@@ -265,11 +270,17 @@ class TestCommand(BaseTest):
             cmd.dst_codec_audio = None
             with self.assertRaises(AudioCodecNotSpecifiedError):
                 list(cmd)
-        with self.subTest("as string"):
-            cmd = create_test_cmd()
-            cmd.dst_codec_audio = None
-            cmd.custom.audio.string = "-acodec aac"
-            list(cmd)  # no exceptions
+
+        for astring in [
+            "-acodec aac",
+            "-codec:a aac",
+            "-c:a aac",
+            "-an"]:
+            with self.subTest(astring):
+                cmd = create_test_cmd()
+                cmd.dst_codec_audio = None
+                cmd.custom.video.string = astring
+                list(cmd)  # no exceptions
 
     def test_dst_range_limited(self):
         cmd = create_test_cmd(zscale=True)
