@@ -5,9 +5,11 @@
 `vtcff` is a library for transcoding between video formats with an emphasis on
 maintaining quality and color depth in video production pipelines. In studio
 tasks, video seconds take up gigabytes and quality compromises are least
-desirable.
+desirable. 
 
-`vtcff` generates arguments for `ffmpeg` – the least intuitive video tool ever
+`vtcff` tends to maximize quality, sacrificing speed and disk space.
+
+`vtcff` is actaully a wrapper for `ffmpeg` – the least intuitive video tool ever
 created.
 
 # Install
