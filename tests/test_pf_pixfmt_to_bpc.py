@@ -1,29 +1,32 @@
+# SPDX-FileCopyrightText: (c) 2016-2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 import unittest
 
-from vtcff._pix_format_depth import guess_color_depth, _three_digits, _ending, \
+from vtcff._pf_20_pixfmt_to_bpc import _guess_bpc, _three_digits, _ending, \
     _subsampling_factor
 
 
 class TestGuess(unittest.TestCase):
     def test(self):
-        self.assertEqual(guess_color_depth('yuva444p12be', 4, 48), 12)
-        self.assertEqual(guess_color_depth('yuvj444p', 3, 24), 8)
-        self.assertEqual(guess_color_depth('yuva422p12be', 4, 36), 12)
-        self.assertEqual(guess_color_depth('yuv420p16le', 3, 24), 16)
-        self.assertEqual(guess_color_depth('yuv420p', 3, 12), 8)
-        self.assertEqual(guess_color_depth('yuv410p', 3, 9), 8)
-        self.assertEqual(guess_color_depth('yuv411p', 3, 12), 8)
-        #self.assertEqual(guess_color_depth('yuv420p9be', 3, 13), 8)
+        self.assertEqual(_guess_bpc('yuva444p12be', 4, 48), 12)
+        self.assertEqual(_guess_bpc('yuvj444p', 3, 24), 8)
+        self.assertEqual(_guess_bpc('yuva422p12be', 4, 36), 12)
+        self.assertEqual(_guess_bpc('yuv420p16le', 3, 24), 16)
+        self.assertEqual(_guess_bpc('yuv420p', 3, 12), 8)
+        self.assertEqual(_guess_bpc('yuv410p', 3, 9), 8)
+        self.assertEqual(_guess_bpc('yuv411p', 3, 12), 8)
+        #self.assertEqual(_guess_bpc('yuv420p9be', 3, 13), 8)
         #yuv420p9be
         #3
         #13
 
-        self.assertEqual(guess_color_depth('yuv444p10be', 3, 30), 10)
-        self.assertEqual(guess_color_depth('yuv440p10be', 3, 20), 10)
-        self.assertEqual(guess_color_depth('gbrap12be', 4, 48), 12)
-        self.assertEqual(guess_color_depth('gbrapf32be', 4, 128), 32)
-        self.assertEqual(guess_color_depth('rgb24', 3, 24), 8)
-        self.assertEqual(guess_color_depth('gbrp10be', 3, 30), 10)
+        self.assertEqual(_guess_bpc('yuv444p10be', 3, 30), 10)
+        self.assertEqual(_guess_bpc('yuv440p10be', 3, 20), 10)
+        self.assertEqual(_guess_bpc('gbrap12be', 4, 48), 12)
+        self.assertEqual(_guess_bpc('gbrapf32be', 4, 128), 32)
+        self.assertEqual(_guess_bpc('rgb24', 3, 24), 8)
+        self.assertEqual(_guess_bpc('gbrp10be', 3, 30), 10)
 
         #3
         #30
