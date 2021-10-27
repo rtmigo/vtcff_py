@@ -6,8 +6,8 @@ import sys
 from typing import Iterable, List, NamedTuple, Optional, Dict
 
 
-def _pix_fmts_lines() -> Iterable[str]:
-    result = subprocess.run(["ffmpeg", "-pix_fmts"],
+def _pix_fmts_lines(ffmpeg_exe: str) -> Iterable[str]:
+    result = subprocess.run([ffmpeg_exe, "-pix_fmts"],
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             encoding=sys.stdout.encoding or "utf-8")
@@ -55,9 +55,9 @@ class PixfmtOutputSpec(NamedTuple):
     bits_per_pixel: int
 
 
-def _pix_fmts_tuples() -> List[PixfmtOutputSpec]:
+def _pix_fmts_tuples(ffmpeg_exe: str) -> List[PixfmtOutputSpec]:
     result = list()
-    for line in _pix_fmts_lines():
+    for line in _pix_fmts_lines(ffmpeg_exe):
         words = line.split()
         pfo = PixfmtOutputSpec(words[0], words[1], int(words[2]),
                                int(words[3]))
@@ -68,19 +68,19 @@ def _pix_fmts_tuples() -> List[PixfmtOutputSpec]:
 _pix_format_spec: Optional[Dict[str, PixfmtOutputSpec]] = None
 
 
-def pixfmt_to_spec(name: str) -> PixfmtOutputSpec:
+def pixfmt_to_spec(name: str, ffmpeg_exe: str) -> PixfmtOutputSpec:
     """Returns a particular parsed line of `ffmpeg -pix_fmts`"""
     global _pix_format_spec
     if _pix_format_spec is None:
         _pix_format_spec = dict()
-        for t in _pix_fmts_tuples():
+        for t in _pix_fmts_tuples(ffmpeg_exe=ffmpeg_exe):
             _pix_format_spec[t.name] = t
     assert _pix_format_spec is not None
     return _pix_format_spec[name]
 
 
-def pixfmt_alpha(pixfmt: str) -> Optional[bool]:
-    spec = pixfmt_to_spec(pixfmt)
+def pixfmt_alpha(pixfmt: str, ffmpeg_exe: str) -> Optional[bool]:
+    spec = pixfmt_to_spec(pixfmt, ffmpeg_exe=ffmpeg_exe)
     if spec.nb_components == 4:
         return True
     elif spec.nb_components == 3:
