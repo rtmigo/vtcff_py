@@ -22,4 +22,3 @@ class BeginEndDuration:
             self.duration = None
         else:
             self.duration = x - self.begin
-

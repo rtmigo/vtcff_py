@@ -4,7 +4,7 @@
 from enum import unique, IntEnum
 from typing import Optional, Tuple, Iterable
 
-from ._codec import Codec
+from ._codec import VideoCodec
 
 
 @unique
@@ -28,7 +28,7 @@ class ProresProfile(IntEnum):
     """ProRes 4444 XQ"""
 
 
-class Prores(Codec):
+class Prores(VideoCodec):
     def __init__(self,
                  profile: ProresProfile = ProresProfile.NORMAL,
                  qscale: Optional[int] = None,
@@ -38,10 +38,12 @@ class Prores(Codec):
         self.spoof_vendor: bool = spoof_vendor
 
     def args(self) -> Iterable[Tuple[str, str]]:
-        yield '-vcodec', 'prores_ks'
+        yield '-codec:v', 'prores_ks'
         if self.spoof_vendor:
             yield '-vendor', 'apl0'
         if self.qscale is not None:
+            if self.qscale is not None and not 0 <= self.qscale <= 64:
+                raise ValueError(self.qscale)
             yield '-q:v', str(self.qscale)
         if self.profile is not None:
             yield '-profile:v', str(self.profile.value)

@@ -1,5 +1,6 @@
 # SPDX-FileCopyrightText: (c) 2021 Artёm IG <github.com/rtmigo>
 # SPDX-License-Identifier: MIT
+
 import random
 import unittest
 from pathlib import Path
@@ -7,9 +8,11 @@ from tempfile import TemporaryDirectory
 from typing import List
 
 from tests.common import create_test_cmd, unique_item_after
-from vtcff import Crop, FfmpegCommand, Hevc, Avc
+from vtcff import Crop, FfmpegCommand, Hevc, VideoCopy, AudioCopy, \
+    VideoCodecNotSpecifiedError, AudioCodecNotSpecifiedError
 from vtcff import HevcLosslessAndNearLosslessError, \
     HevcBitrateSpecifiedForLosslessError
+from vtcff._codec_audio_none import NoAudio
 from vtcff._codec_avc_preset import VcPreset
 from vtcff._codec_prores_ks import Prores, ProresProfile
 from vtcff._common import Scale
@@ -64,28 +67,28 @@ class TestInputArg(BaseTest):
 class TestProres(BaseTest):
     def test_prores(self):
         cmd = create_test_cmd()
-        items = ['-vcodec prores_ks', '-profile:v 2']
+        items = ['-codec:v prores_ks', '-profile:v 2']
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Prores()
         self.assertAllIn(items, str(cmd))
 
     def test_prores_hq(self):
         cmd = create_test_cmd()
-        items = ['-vcodec prores_ks', '-profile:v 3']
+        items = ['-codec:v prores_ks', '-profile:v 3']
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Prores(profile=ProresProfile.HQ)
         self.assertAllIn(items, str(cmd))
 
     def test_prores_vendor(self):
         cmd = create_test_cmd()
-        items = ['-vcodec prores_ks', '-vendor apl0']
+        items = ['-codec:v prores_ks', '-vendor apl0']
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Prores(spoof_vendor=True)
         self.assertAllIn(items, str(cmd))
 
     def test_prores_qscale(self):
         cmd = create_test_cmd()
-        items = ['-vcodec prores_ks', '-q:v 5']
+        items = ['-codec:v prores_ks', '-q:v 5']
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Prores(qscale=5)
         self.assertAllIn(items, str(cmd))
@@ -94,21 +97,21 @@ class TestProres(BaseTest):
 class TestHevc(BaseTest):
     def test_base(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx265']
+        items = ['-codec:v libx265']
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Hevc(mbps=100)
         self.assertAllIn(items, str(cmd))
 
     def test_preset(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx265', '-preset superfast']
+        items = ['-codec:v libx265', '-preset superfast']
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Hevc(mbps=100, preset=VcPreset.N2_SUPERFAST)
         self.assertAllIn(items, str(cmd))
 
     def test_lossless(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx265', '-x265-params', 'lossless=1']
+        items = ['-codec:v libx265', '-x265-params', 'lossless=1']
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Hevc(lossless=True)
         self.assertAllIn(items, str(cmd))
@@ -116,7 +119,7 @@ class TestHevc(BaseTest):
 
     def test_near_lossless(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx265', '-x265-params',
+        items = ['-codec:v libx265', '-x265-params',
                  'cu-lossless=1:psy-rd=1.0:rd=3']
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Hevc(near_lossless=True, mbps=100)
@@ -125,7 +128,7 @@ class TestHevc(BaseTest):
 
     def test_bitrate(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx265', '-x265-params', 'bitrate=123500']
+        items = ['-codec:v libx265', '-x265-params', 'bitrate=123500']
         self.assertNoneIn(items, str(cmd))
         cmd.dst_codec_video = Hevc(mbps=123.5)
         self.assertAllIn(items, str(cmd))
@@ -139,20 +142,34 @@ class TestHevc(BaseTest):
             list(Hevc(lossless=True, mbps=100).args())
 
 
-class TestAvc(BaseTest):
+class TestVideoCopy(BaseTest):
     def test_base(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx264']
+        cmd.dst_codec_video = Prores()
+        items = ['-codec:v copy']
         self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Avc()
+        cmd.dst_codec_video = VideoCopy()
+        cmd.dst_codec_audio = AudioCopy()  # todo replace
         self.assertAllIn(items, str(cmd))
 
-    def test_preset(self):
+
+class TestAudioCopy(BaseTest):
+    def test_base(self):
         cmd = create_test_cmd()
-        items = ['-vcodec libx264', '-preset fast']
-        self.assertNoneIn(items, str(cmd))
-        cmd.dst_codec_video = Avc(preset=VcPreset.N5_FAST)
+        items = ['-codec:a copy']
+        cmd.dst_codec_audio = AudioCopy()
+        cmd.dst_codec_video = Hevc(mbps=50)
         self.assertAllIn(items, str(cmd))
+
+
+class TestNoAudio(BaseTest):
+    def test_base(self):
+        cmd = create_test_cmd()
+        items = ['-an']
+        self.assertNoneIn(items, str(cmd))
+        cmd.dst_codec_audio = NoAudio()
+        self.assertAllIn(items, str(cmd))
+        self.assertNotIn("None", str(cmd))
 
 
 class TestsZscale(BaseTest):
@@ -171,6 +188,7 @@ class TestsZscale(BaseTest):
         cmd = FfmpegCommand()
         cmd.src_file = "a"
         cmd.dst_file = "b"
+
         self.assertTrue(cmd._use_zscale)
         cmd.scale = Scale(2048, 1920)
         self.assertIn("zscale=", str(cmd))
@@ -202,19 +220,11 @@ class TestsZscale(BaseTest):
 
         self.assertAllIn(expected, str(cmd))
 
-    # def test_zscale_no_auto_conversion_filters(self):
-    #     cmd = create_test_cmd()
-    #
-    #     # when zscale is on auto_conversions are disabled
-    #     cmd.use_zscale = True
-    #     self.assertNotIn('-auto_conversion_filters', list(cmd))
-    #     self.assertIn('-noauto_conversion_filters', list(cmd))
-    #
-    #     # when zscale is off auto_conversions are enabled
-    #     cmd.use_zscale = False
-    #     self.assertNotIn('-auto_conversion_filters', list(cmd))
-    #     self.assertNotIn('-noauto_conversion_filters', list(cmd))
-
+    def test_warning(self):
+        with self.assertWarns(UserWarning):
+            cmd = create_test_cmd()
+            cmd.dst_color_space = 'bt2020'
+            list(cmd)
 
 
 class TestCommand(BaseTest):
@@ -231,8 +241,6 @@ class TestCommand(BaseTest):
         cmd = create_test_cmd()
         self.assertEqual(cmd.dst_file, list(cmd)[-1])
 
-
-
     def test_framerate_before_i(self):
         cmd = create_test_cmd()
         cmd.src_fps = 30
@@ -245,6 +253,41 @@ class TestCommand(BaseTest):
         cmd.src_gamma = 2.2
         args = list(cmd)
         self.assertLess(args.index('-gamma'), args.index('-i'))
+
+    def test_video_codec_necessary(self):
+        with self.subTest("None"):
+            cmd = create_test_cmd()
+            cmd.dst_codec_video = None
+            with self.assertRaises(VideoCodecNotSpecifiedError):
+                list(cmd)
+        for vstring in [
+            "-vcodec prores",
+            "-codec:v prores",
+            "-c:v prores",
+            "-vn"]:
+            with self.subTest(vstring):
+                cmd = create_test_cmd()
+                cmd.dst_codec_video = None
+                cmd.custom.video.string = vstring
+                list(cmd)  # no exceptions
+
+    def test_audio_codec_necessary(self):
+        with self.subTest("None"):
+            cmd = create_test_cmd()
+            cmd.dst_codec_audio = None
+            with self.assertRaises(AudioCodecNotSpecifiedError):
+                list(cmd)
+
+        for astring in [
+            "-acodec aac",
+            "-codec:a aac",
+            "-c:a aac",
+            "-an"]:
+            with self.subTest(astring):
+                cmd = create_test_cmd()
+                cmd.dst_codec_audio = None
+                cmd.custom.audio.string = astring
+                list(cmd)  # no exceptions
 
     def test_dst_range_limited(self):
         cmd = create_test_cmd(zscale=True)
@@ -303,13 +346,13 @@ class TestCommand(BaseTest):
         cmd.dst_color_space = 'bt709'
         self.assertIn('-colorspace bt709', str(cmd))
 
-        cmd.custom.video.list.extend(['-colorspace', 'bt2020'])
+        cmd.custom.video.list.extend(['-colorspace', 'bt2020ncl'])
         self.assertNotIn('-colorspace bt709', str(cmd))
-        self.assertIn('-colorspace bt2020', str(cmd))
+        self.assertIn('-colorspace bt2020ncl', str(cmd))
 
         cmd.custom.video.string = '-colorspace bt601'
         self.assertNotIn('-colorspace bt709', str(cmd))
-        self.assertNotIn('-colorspace bt2020', str(cmd))
+        self.assertNotIn('-colorspace bt2020ncl', str(cmd))
         self.assertIn('-colorspace bt601', str(cmd))
 
     def test_override_unset_param(self):
@@ -451,8 +494,8 @@ class TestCommand(BaseTest):
                           downscale_only=random_bool())
             src_range_full = random_bool()
             dst_range_full = random_bool()
-            src_color = random.choice(('bt709', 'bt2020'))
-            dst_color = random.choice(('bt709', 'bt2020'))
+            src_color = random.choice(('bt709', 'bt2020ncl'))
+            dst_color = random.choice(('bt709', 'bt2020ncl'))
 
             cmd.scale = scale
             cmd.src_range_full = src_range_full

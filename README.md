@@ -66,10 +66,10 @@ cmd.dst_file = 'target.mov'
 cmd.dst_codec_video = Prores()
 
 print(str(cmd))
-# ffmpeg -i source.mov -vcodec prores_ks target.mov
+# ffmpeg -i source.mov -codec:v prores_ks target.mov
 
 print(list(cmd))
-# ['ffmpeg', '-i', 'source.mov', '-vcodec', 'prores_ks', 'target.mov']
+# ['ffmpeg', '-i', 'source.mov', '-codec:v', 'prores_ks', 'target.mov']
 
 # running in different ways:
 os.system(str(cmd))
@@ -87,11 +87,11 @@ from vtcff import FfmpegCommand
 cmd = FfmpegCommand()
 
 # set arguments as string
-cmd.custom.video.string = "-vcodec libx265"
+cmd.custom.video.string = "-codec:v libx265"
 cmd.custom.video.string += "-x265-params lossless=1"
 
 # or as list
-cmd.custom.video.list = ["-vcodec", "libx265"]
+cmd.custom.video.list = ["-codec:v", "libx265"]
 cmd.custom.video.list.extend(["-x265-params", "lossless=1"])
 ```
 
@@ -238,6 +238,27 @@ By default, the `lossless` is set to fastest possible
 `VcPreset.N1_ULTRAFAST`, because we are not losing any quality here. The
 resulting size will be roughly comparable to ProRes HQ/XQ and the encoding time
 is reasonable.
+
+## Copying streams
+
+The media streams can be copied without re-encoding and without quality loss.
+
+However, there may be some loss of metadata – for example, information 
+about color ranges and color spaces.
+
+```python3
+from vtcff import FfmpegCommand, VideoCopy, NoAudio
+
+cmd = FfmpegCommand()
+
+# changing container from mp4 to mov
+cmd.src_file = "source.mp4"
+cmd.dst_file = "source.mov"
+
+# keeping video, removing audio
+cmd.dst_codec_video = VideoCopy()
+cmd.dst_codec_audio = NoAudio()
+```
 
 # Images to videos
 
