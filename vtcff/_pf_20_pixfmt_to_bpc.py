@@ -226,6 +226,8 @@ import re
 import warnings
 from typing import Optional
 
+from vtcff._pf_10_pixfmts_stdout_parser import pixfmt_to_spec
+
 
 def _int_if_round(f: float) -> Optional[int]:
     result = int(f)
@@ -313,7 +315,7 @@ def _guess_from_suffix(name: str, components: int, bits_per_pixel: int) -> \
     return None
 
 
-def guess_color_depth(name: str, components: int, bits_per_pixel: int) \
+def _guess_bpc(name: str, components: int, bits_per_pixel: int) \
         -> Optional[int]:
     result = (_pix_format_to_depth.get(name)
               or _guess_from_suffix(name, components, bits_per_pixel)
@@ -321,3 +323,8 @@ def guess_color_depth(name: str, components: int, bits_per_pixel: int) \
     if result is None:
         warnings.warn(f"Color depth of {name} format is unknown.")
     return result
+
+
+def pixfmt_to_bpc(name: str) -> Optional[int]:
+    spec = pixfmt_to_spec(name)
+    return _guess_bpc(spec.name, spec.nb_components, spec.bits_per_pixel)

@@ -1,6 +1,9 @@
+# SPDX-FileCopyrightText: (c) 2016-2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 import unittest
 
-from vtcff._pix_formats_reader import _pix_fmts_tuples, pix_format_spec
+from vtcff._pf_10_pixfmts_stdout_parser import _pix_fmts_tuples, pixfmt_to_spec
 
 
 class TestPixFmts(unittest.TestCase):
@@ -13,9 +16,9 @@ class TestPixFmts(unittest.TestCase):
         self.assertEqual(z.flags, 'IO...')
 
     def test_get_by_name(self):
-        z = pix_format_spec('yuva444p10le')
+        z = pixfmt_to_spec('yuva444p10le')
         self.assertEqual(z.name, 'yuva444p10le')
         self.assertEqual(z.bits_per_pixel, 40)
 
         with self.assertRaises(KeyError):
-            pix_format_spec('abcd')
+            pixfmt_to_spec('abcd')

@@ -1,19 +1,22 @@
+# SPDX-FileCopyrightText: (c) 2016-2021 Artёm IG <github.com/rtmigo>
+# SPDX-License-Identifier: MIT
+
 import subprocess
 import sys
 from typing import Iterable, List, NamedTuple, Optional, Dict
 
 
-# перенесено в vtcff
-
 def _pix_fmts_lines() -> Iterable[str]:
-    txt = subprocess.check_output(["ffmpeg", "-pix_fmts"],
-                                  stderr=subprocess.PIPE,
-                                  encoding=sys.stdout.encoding or "utf-8")
+    result = subprocess.run(["ffmpeg", "-pix_fmts"],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            encoding=sys.stdout.encoding or "utf-8")
+    if result.returncode != 0:
+        raise subprocess.CalledProcessError
 
-    # if isinstance(txt, bytes):
-    #   txt = txt.decode(sys.stdout.encoding)
+    txt = result.stdout
 
-    # там что-то вроде:
+    # txt is something like
     #
     # Pixel formats:
     # I.... = Supported Input  format for conversion
@@ -45,27 +48,27 @@ def _pix_fmts_lines() -> Iterable[str]:
         raise ValueError(f"Failed to split output to lines. Output: {txt}")
 
 
-class PixelFormatOutput(NamedTuple):
+class PixfmtOutputSpec(NamedTuple):
     flags: str
     name: str
     nb_components: int
     bits_per_pixel: int
 
 
-def _pix_fmts_tuples() -> List[PixelFormatOutput]:
+def _pix_fmts_tuples() -> List[PixfmtOutputSpec]:
     result = list()
     for line in _pix_fmts_lines():
         words = line.split()
-        pfo = PixelFormatOutput(words[0], words[1], int(words[2]),
-                                int(words[3]))
+        pfo = PixfmtOutputSpec(words[0], words[1], int(words[2]),
+                               int(words[3]))
         result.append(pfo)
     return result
 
 
-_pix_format_spec: Optional[Dict[str, PixelFormatOutput]] = None
+_pix_format_spec: Optional[Dict[str, PixfmtOutputSpec]] = None
 
 
-def pix_format_spec(name: str) -> PixelFormatOutput:
+def pixfmt_to_spec(name: str) -> PixfmtOutputSpec:
     """Returns a particular parsed line of `ffmpeg -pix_fmts`"""
     global _pix_format_spec
     if _pix_format_spec is None:
