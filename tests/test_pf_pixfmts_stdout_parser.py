@@ -3,7 +3,8 @@
 
 import unittest
 
-from vtcff._pf_10_pixfmts_stdout_parser import _pix_fmts_tuples, pixfmt_to_spec
+from vtcff._pf_10_pixfmts_stdout_parser import _pix_fmts_tuples, pixfmt_to_spec, \
+    pixfmt_alpha
 
 
 class TestPixFmts(unittest.TestCase):
@@ -22,3 +23,10 @@ class TestPixFmts(unittest.TestCase):
 
         with self.assertRaises(KeyError):
             pixfmt_to_spec('abcd')
+
+
+class TestAlpha(unittest.TestCase):
+    def test_alpha(self):
+        self.assertEqual(pixfmt_alpha('yuva444p10le'), True)
+        self.assertEqual(pixfmt_alpha('yuv422p10le'), False)
+        self.assertEqual(pixfmt_alpha('ya8'), None)

@@ -227,29 +227,13 @@ import warnings
 from typing import Optional
 
 from vtcff._pf_10_pixfmts_stdout_parser import pixfmt_to_spec
+from vtcff._pf_15_pixfmt_subsampling import pixfmt_subsampling
 
 
 def _int_if_round(f: float) -> Optional[int]:
     result = int(f)
     if abs(result - f) < 0.0000001:
         return result
-    else:
-        return None
-
-
-def _contains_three_digits(text, digits):
-    """True if `text` contains something like aXXXb, where XXX are digits
-    and a, b - are not."""
-    assert digits.isdigit()
-    return re.search(f'\\D{digits}(?!\d)', text) is not None
-
-
-def _three_digits(text) -> Optional[str]:
-    """True if `text` contains something like aXXXb, where XXX are digits
-    and a, b - are not."""
-    m = re.search(r'(?<!\d)([01234]{3})(?!\d)', text)
-    if m:
-        return str(m.group(1))
     else:
         return None
 
@@ -275,7 +259,7 @@ def _subsampling_factor(name: str, components: int) -> Optional[float]:
 
     if components not in (3, 4):
         return None
-    subsampling_str = _three_digits(name)
+    subsampling_str = pixfmt_subsampling(name)
     if not subsampling_str:
         return None
     assert len(subsampling_str) == 3 and subsampling_str.isdigit()
@@ -325,6 +309,9 @@ def _guess_bpc(name: str, components: int, bits_per_pixel: int) \
     return result
 
 
-def pixfmt_to_bpc(name: str) -> Optional[int]:
-    spec = pixfmt_to_spec(name)
+def pixfmt_bpc(pixfmt: str) -> Optional[int]:
+    """Returns the estimated number of bits-per-color-channel after decoding
+    from the specified pixel format. This value optimistically indicates the
+    maximum number of color gradations in each of the channels R, G, B, A."""
+    spec = pixfmt_to_spec(pixfmt)
     return _guess_bpc(spec.name, spec.nb_components, spec.bits_per_pixel)

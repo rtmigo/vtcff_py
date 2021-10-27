@@ -17,4 +17,7 @@ from ._filter_pad import Pad
 from ._filter_transpose import Transpose
 from ._math_cropping import crop_and_scale
 from ._math_padding import _letterbox
-from ._pf_20_pixfmt_to_bpc import pixfmt_to_bpc
+from ._pf_10_pixfmts_stdout_parser import pixfmt_alpha
+from ._pf_15_pixfmt_subsampling import pixfmt_subsampling
+from ._pf_20_pixfmt_bpc import pixfmt_bpc
+

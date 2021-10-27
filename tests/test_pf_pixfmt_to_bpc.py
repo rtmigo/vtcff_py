@@ -3,8 +3,8 @@
 
 import unittest
 
-from vtcff._pf_20_pixfmt_to_bpc import _guess_bpc, _three_digits, _ending, \
-    _subsampling_factor
+from vtcff._pf_20_pixfmt_bpc import _guess_bpc, _ending, _subsampling_factor
+from vtcff._pf_15_pixfmt_subsampling import _three_digits
 
 
 class TestGuess(unittest.TestCase):
@@ -16,10 +16,10 @@ class TestGuess(unittest.TestCase):
         self.assertEqual(_guess_bpc('yuv420p', 3, 12), 8)
         self.assertEqual(_guess_bpc('yuv410p', 3, 9), 8)
         self.assertEqual(_guess_bpc('yuv411p', 3, 12), 8)
-        #self.assertEqual(_guess_bpc('yuv420p9be', 3, 13), 8)
-        #yuv420p9be
-        #3
-        #13
+        # self.assertEqual(_guess_bpc('yuv420p9be', 3, 13), 8)
+        # yuv420p9be
+        # 3
+        # 13
 
         self.assertEqual(_guess_bpc('yuv444p10be', 3, 30), 10)
         self.assertEqual(_guess_bpc('yuv440p10be', 3, 20), 10)
@@ -28,8 +28,8 @@ class TestGuess(unittest.TestCase):
         self.assertEqual(_guess_bpc('rgb24', 3, 24), 8)
         self.assertEqual(_guess_bpc('gbrp10be', 3, 30), 10)
 
-        #3
-        #30
+        # 3
+        # 30
 
 
 class TestThreeDigits(unittest.TestCase):
