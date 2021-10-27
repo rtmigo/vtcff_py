@@ -305,11 +305,11 @@ def _guess_from_suffix(name: str, components: int, bits_per_pixel: int) -> \
     e: Optional[int] = _ending(name)
     if e is not None:
         if e == bits_per_pixel:
-            # like in rgb24, 24 means 8+8+8
+            # like in rgb24, 24 means 8+8+8, 8 bit per channel
             return _int_if_round(bits_per_pixel / components)
         f = _subsampling_factor(name, components) or 1.0
         if e * components * f == bits_per_pixel:
-            # yuv444p12le: 12 means bits per channel
+            # yuv444p12le: 12 bits per channel
             # yuv440p10be: 10 bits per channel
             return e
     return None
