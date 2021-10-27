@@ -109,7 +109,7 @@ Arguments to be inserted after `-i source`:
 
 # zscale vs scale
 
-`ffmpeg` has two filters for color and frame size conversions:
+`ffmpeg` has two video filters for color and frame size conversions:
 
 - [`scale`](https://ffmpeg.org/ffmpeg-filters.html#scale-1) ([libswscale](https://ffmpeg.org/libswscale.html))
   is more versatile
@@ -117,9 +117,10 @@ Arguments to be inserted after `-i source`:
   gives a more predictable quality
 
 By default, `vtcff` uses `zscale`. Sometimes it may lead to error "no path
-between colorspaces". This error would not occur with `scale`.
+between colorspaces". If other methods do not help, you can simply replace `zscale` with `scale`.
 
-The `use_zscale` property determines which filter to use.
+- `cmd.use_zscale == True` means `zscale` is used
+- `cmd.use_zscale == False` means `scale` is used
 
 ```python3
 from vtcff import FfmpegCommand, Scale
