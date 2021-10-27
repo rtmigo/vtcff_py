@@ -77,3 +77,13 @@ def pixfmt_to_spec(name: str) -> PixfmtOutputSpec:
             _pix_format_spec[t.name] = t
     assert _pix_format_spec is not None
     return _pix_format_spec[name]
+
+
+def pixfmt_alpha(pixfmt: str) -> Optional[bool]:
+    spec = pixfmt_to_spec(pixfmt)
+    if spec.nb_components == 4:
+        return True
+    elif spec.nb_components == 3:
+        return False
+    else:
+        return None
