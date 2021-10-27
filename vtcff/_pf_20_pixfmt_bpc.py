@@ -309,9 +309,10 @@ def _guess_bpc(name: str, components: int, bits_per_pixel: int) \
     return result
 
 
-def pixfmt_bpc(pixfmt: str) -> Optional[int]:
+def pixfmt_bpc(pixfmt: str, ffmpeg_exe: str) -> Optional[int]:
     """Returns the estimated number of bits-per-color-channel after decoding
     from the specified pixel format. This value optimistically indicates the
     maximum number of color gradations in each of the channels R, G, B, A."""
-    spec = pixfmt_to_spec(pixfmt)
+    # todo test alternate path to ffmpeg_exe
+    spec = pixfmt_to_spec(pixfmt, ffmpeg_exe)
     return _guess_bpc(spec.name, spec.nb_components, spec.bits_per_pixel)
