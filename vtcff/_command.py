@@ -12,12 +12,13 @@ from vtcff._args_subset import ArgsSubset
 from vtcff._codec import Codec
 from vtcff._codec_audio_copy import AudioCopy
 from vtcff._codec_video_copy import VideoCopy
+from vtcff._colorspaces import ColorSpace
 from vtcff._common import Scale
 from vtcff._filter_crop import Crop
 from vtcff._filter_pad import Pad
 from vtcff._filter_swscale import SwscaleFilter
 from vtcff._filter_transpose import Transpose, TransposeFilter
-from vtcff._filter_zscale import ZscaleFilter, ColorSpaces
+from vtcff._filter_zscale import ZscaleFilter, ColorSpaceConvertor
 from vtcff._time_span import BeginEndDuration
 
 
@@ -296,7 +297,7 @@ class FfmpegCommand:
     def src_color_space(self) -> Optional[str]:
         if self._use_zscale:
             # todo test
-            return ColorSpaces.zscale_to_ffmpeg(self._zscale().src_matrix)
+            return ColorSpaceConvertor.zscale_to_ffmpeg(self._zscale().src_matrix)
         else:
             # todo test
             return self._swscale().src_matrix
@@ -304,7 +305,7 @@ class FfmpegCommand:
     @src_color_space.setter
     def src_color_space(self, val: Optional[str]):
         if self._use_zscale:
-            self._zscale().src_matrix = ColorSpaces.ffmpeg_to_zscale(val)
+            self._zscale().src_matrix = ColorSpaceConvertor.ffmpeg_to_zscale(val)
         else:
             # todo test
             self._swscale().src_matrix = val
@@ -313,7 +314,7 @@ class FfmpegCommand:
     def dst_color_space(self) -> Optional[str]:
         if self._use_zscale:
             # todo test
-            return ColorSpaces.zscale_to_ffmpeg(self._zscale().dst_matrix)
+            return ColorSpaceConvertor.zscale_to_ffmpeg(self._zscale().dst_matrix)
         else:
             # todo test
             return self._swscale().dst_matrix
@@ -321,7 +322,7 @@ class FfmpegCommand:
     @dst_color_space.setter
     def dst_color_space(self, val: Optional[str]):
         if self._use_zscale:
-            self._zscale().dst_matrix = ColorSpaces.ffmpeg_to_zscale(val)
+            self._zscale().dst_matrix = ColorSpaceConvertor.ffmpeg_to_zscale(val)
         else:
             self._swscale().dst_matrix = val
 
