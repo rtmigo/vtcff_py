@@ -133,7 +133,7 @@ cmd.use_zscale = False  # switching to 'scale' (libswscale)
 # properties affected:
 cmd.scale = Scale(1920, 1080)
 cmd.src_color_space = 'bt709'
-cmd.dst_color_space = 'bt2020'
+cmd.dst_color_space = 'bt2020ncl'
 cmd.src_range_full = True
 cmd.dst_range_full = False
 ```
@@ -144,7 +144,8 @@ will be of high quality.
 
 However, **implicit** conversions may also be required. For example, before
 processing 16-bit PNG with `zscale`, we need to convert the pixel format from
-`rgba64be` to `gbrap16le` 🤪. Ffmpeg will do it automatically with `libswscale`.
+`rgba64be` to `gbrap16le` 🤪. Ffmpeg will do it automatically with `libswscale`
+regardless of the `use_zscale` property.
 
 # Crop and scale
 
@@ -190,7 +191,7 @@ cmd.dst_range_full = False
 
 # rec.709 to rec.2020 
 cmd.src_color_space = 'bt709'
-cmd.dst_color_space = 'bt2020'
+cmd.dst_color_space = 'bt2020ncl'
 ```
 
 # Target formats
