@@ -4,7 +4,7 @@
 import os.path
 import warnings
 from pathlib import Path
-from typing import Optional, List, Iterable, Dict, Union, Tuple
+from typing import Optional, List, Iterable, Dict, Union, Tuple, Type
 
 import framefile
 
@@ -12,7 +12,6 @@ from vtcff._args_subset import ArgsSubset
 from vtcff._codec import Codec
 from vtcff._codec_audio_copy import AudioCopy
 from vtcff._codec_video_copy import VideoCopy
-from vtcff._colorspaces import ColorSpace
 from vtcff._common import Scale
 from vtcff._filter_crop import Crop
 from vtcff._filter_pad import Pad
@@ -234,7 +233,6 @@ class FfmpegCommand:
         self.src_color_space = old_src_color_space
         self.dst_color_space = old_dst_color_space
 
-
     @property
     def scale(self) -> Optional[Scale]:
         if self._use_zscale:
@@ -267,29 +265,28 @@ class FfmpegCommand:
                 sw.height = None
                 sw.downscale_only = False
 
-    def _place_a_before_b(self, filter_type_a, filter_type_b):
-        idx_a = self._find_filter_index(filter_type_a)
-        if idx_a<0:
-            raise KeyError(filter_type_a)
-        idx_b = self._find_filter_index(filter_type_b)
+    def _place_a_before_b(self, type_a: Type, type_b: Type):
+        idx_a = self._find_filter_index(type_a)
+        if idx_a < 0:
+            raise ValueError(f"Filter {type_a} not found")
+        idx_b = self._find_filter_index(type_b)
         if idx_b < 0:
-            raise KeyError(filter_type_b)
+            raise ValueError(f"Filter {type_b} not found")
+        if idx_a == idx_b:
+            raise ValueError(f"{type_a} and {type_b} matching the same filter.")
 
-        if idx_a>idx_b:
+        if idx_a > idx_b:
             self._filter_chain.insert(idx_b, self._filter_chain.pop(idx_a))
 
-        # filter_a = self._filter_chain.pop(idx_a)
-        # target_idx = idx_b
-        # assert isinstance(self._filter_chain[target_idx-1],
-        #                   filter_type_b)
-        # self._filter_chain.insert(target_idx, filter_a)
-        assert self._find_filter_index(filter_type_a)<self._find_filter_index(filter_type_b) #+1, (self._find_filter_index(filter_type_a), self._find_filter_index(filter_type_b))
+        assert (self._find_filter_index(type_a)
+                < self._find_filter_index(type_b))
 
     def _crop_before_scale(self):
+        """Places Crop filter before Zscale/Swscale in the filter chain."""
+        # todo test
         self._place_a_before_b(
-            filter_type_a=Crop,
-            filter_type_b=ZscaleFilter if self.use_zscale else SwscaleFilter)
-
+            type_a=Crop,
+            type_b=ZscaleFilter if self.use_zscale else SwscaleFilter)
 
     @property
     def transpose(self) -> Optional[Transpose]:
@@ -328,7 +325,8 @@ class FfmpegCommand:
     def src_color_space(self) -> Optional[str]:
         if self._use_zscale:
             # todo test
-            return ColorSpaceConvertor.zscale_to_ffmpeg(self._zscale().src_matrix)
+            return ColorSpaceConvertor.zscale_to_ffmpeg(
+                self._zscale().src_matrix)
         else:
             # todo test
             return self._swscale().src_matrix
@@ -336,7 +334,8 @@ class FfmpegCommand:
     @src_color_space.setter
     def src_color_space(self, val: Optional[str]):
         if self._use_zscale:
-            self._zscale().src_matrix = ColorSpaceConvertor.ffmpeg_to_zscale(val)
+            self._zscale().src_matrix = ColorSpaceConvertor.ffmpeg_to_zscale(
+                val)
         else:
             # todo test
             self._swscale().src_matrix = val
@@ -345,7 +344,8 @@ class FfmpegCommand:
     def dst_color_space(self) -> Optional[str]:
         if self._use_zscale:
             # todo test
-            return ColorSpaceConvertor.zscale_to_ffmpeg(self._zscale().dst_matrix)
+            return ColorSpaceConvertor.zscale_to_ffmpeg(
+                self._zscale().dst_matrix)
         else:
             # todo test
             return self._swscale().dst_matrix
@@ -353,7 +353,8 @@ class FfmpegCommand:
     @dst_color_space.setter
     def dst_color_space(self, val: Optional[str]):
         if self._use_zscale:
-            self._zscale().dst_matrix = ColorSpaceConvertor.ffmpeg_to_zscale(val)
+            self._zscale().dst_matrix = ColorSpaceConvertor.ffmpeg_to_zscale(
+                val)
         else:
             self._swscale().dst_matrix = val
 
