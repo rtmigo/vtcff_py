@@ -165,6 +165,12 @@ class FfmpegCommand:
                 return vf
         return None
 
+    def _find_filter_index(self, obj_type) -> int:
+        for idx, vf in enumerate(self._filter_chain):
+            if isinstance(vf, obj_type):
+                return idx
+        return -1
+
     def _replace_filter(self, obj_type, new_instance):
         for idx, item in enumerate(self._filter_chain):
             if isinstance(item, obj_type):
@@ -228,6 +234,7 @@ class FfmpegCommand:
         self.src_color_space = old_src_color_space
         self.dst_color_space = old_dst_color_space
 
+
     @property
     def scale(self) -> Optional[Scale]:
         if self._use_zscale:
@@ -259,6 +266,30 @@ class FfmpegCommand:
                 sw.width = None
                 sw.height = None
                 sw.downscale_only = False
+
+    def _place_a_before_b(self, filter_type_a, filter_type_b):
+        idx_a = self._find_filter_index(filter_type_a)
+        if idx_a<0:
+            raise KeyError(filter_type_a)
+        idx_b = self._find_filter_index(filter_type_b)
+        if idx_b < 0:
+            raise KeyError(filter_type_b)
+
+        if idx_a>idx_b:
+            self._filter_chain.insert(idx_b, self._filter_chain.pop(idx_a))
+
+        # filter_a = self._filter_chain.pop(idx_a)
+        # target_idx = idx_b
+        # assert isinstance(self._filter_chain[target_idx-1],
+        #                   filter_type_b)
+        # self._filter_chain.insert(target_idx, filter_a)
+        assert self._find_filter_index(filter_type_a)<self._find_filter_index(filter_type_b) #+1, (self._find_filter_index(filter_type_a), self._find_filter_index(filter_type_b))
+
+    def _crop_before_scale(self):
+        self._place_a_before_b(
+            filter_type_a=Crop,
+            filter_type_b=ZscaleFilter if self.use_zscale else SwscaleFilter)
+
 
     @property
     def transpose(self) -> Optional[Transpose]:
