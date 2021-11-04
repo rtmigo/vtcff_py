@@ -186,3 +186,4 @@ def crop_and_scale(cmd: FfmpegCommand,
                               alignY=align_y)
     cmd.crop = Crop(left=x, top=y, width=w, height=h)
     cmd.scale = Scale(-2, dst_height)
+    cmd._crop_before_scale()

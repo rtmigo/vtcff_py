@@ -109,7 +109,7 @@ Arguments to be inserted after `-i source`:
 
 # zscale vs scale
 
-`ffmpeg` has two filters for color and frame size conversions:
+`ffmpeg` has two video filters for color and frame size conversions:
 
 - [`scale`](https://ffmpeg.org/ffmpeg-filters.html#scale-1) ([libswscale](https://ffmpeg.org/libswscale.html))
   is more versatile
@@ -117,9 +117,10 @@ Arguments to be inserted after `-i source`:
   gives a more predictable quality
 
 By default, `vtcff` uses `zscale`. Sometimes it may lead to error "no path
-between colorspaces". This error would not occur with `scale`.
+between colorspaces". If other methods do not help, you can simply replace `zscale` with `scale`.
 
-The `use_zscale` property determines which filter to use.
+- `cmd.use_zscale == True` means `zscale` is used
+- `cmd.use_zscale == False` means `scale` is used
 
 ```python3
 from vtcff import FfmpegCommand, Scale
@@ -132,7 +133,7 @@ cmd.use_zscale = False  # switching to 'scale' (libswscale)
 # properties affected:
 cmd.scale = Scale(1920, 1080)
 cmd.src_color_space = 'bt709'
-cmd.dst_color_space = 'bt2020'
+cmd.dst_color_space = 'bt2020ncl'
 cmd.src_range_full = True
 cmd.dst_range_full = False
 ```
@@ -143,7 +144,8 @@ will be of high quality.
 
 However, **implicit** conversions may also be required. For example, before
 processing 16-bit PNG with `zscale`, we need to convert the pixel format from
-`rgba64be` to `gbrap16le` 🤪. Ffmpeg will do it automatically with `libswscale`.
+`rgba64be` to `gbrap16le` 🤪. Ffmpeg will do it automatically with `libswscale`
+regardless of the `use_zscale` property.
 
 # Crop and scale
 
@@ -189,7 +191,7 @@ cmd.dst_range_full = False
 
 # rec.709 to rec.2020 
 cmd.src_color_space = 'bt709'
-cmd.dst_color_space = 'bt2020'
+cmd.dst_color_space = 'bt2020ncl'
 ```
 
 # Target formats

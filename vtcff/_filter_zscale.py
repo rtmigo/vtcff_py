@@ -97,7 +97,7 @@ class ZscaleFilter(FilterBase):
             lhs + '=' + rhs for (lhs, rhs) in all_pairs.items())
 
 
-class ColorSpaces:
+class ColorSpaceConvertor:
     # http://underpop.online.fr/f/ffmpeg/help/zscale.htm.gz
     _data = [
         # left ffmpeg, right zscale
